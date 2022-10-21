@@ -22,7 +22,13 @@ actual object ServiceMethodProvider {
             val params = serviceMethod.valueParameters
             var isCompatible = true
             for (i in params.indices) {
-                val dataType = dataTypes[i]?.javaObjectType ?: continue
+                val dataType = dataTypes[i]?.javaObjectType
+                    ?: if (params[i].type.isMarkedNullable)
+                        continue
+                    else {
+                        isCompatible = false
+                        break
+                    }
                 val paramType = (params[i].type.classifier as KClass<*>).javaObjectType
                 if (!paramType.isAssignableFrom(dataType)) {
                     isCompatible = false
