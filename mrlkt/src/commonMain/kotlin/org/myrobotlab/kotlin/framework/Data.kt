@@ -4,15 +4,16 @@ import io.ktor.util.date.*
 
 @MrlClassMapping("org.myrobotlab.framework.Message")
 data class Message(
-    val msgId: Long = getTimeMillis(),
     val name: String,
+    val method: String,
+    val data: List<Any?>,
     val sender: String = "",
     val sendingMethod: String = "",
     val historyList: List<String> = listOf(),
     val status: String = "",
     val encoding: String = "",
-    val method: String,
-    val data: List<Any?>
+    val msgId: Long = getTimeMillis()
+
 )
 
 @MrlClassMapping("org.myrobotlab.framework.Registration")
