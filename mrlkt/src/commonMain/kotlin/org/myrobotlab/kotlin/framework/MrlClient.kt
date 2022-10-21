@@ -32,4 +32,8 @@ object MrlClient {
         return serde?.deserialize("")
     }
 
+    suspend fun sendCommand(name: String, method: String, data: List<Any?>) {
+        TODO("Need to implement sendCommand()")
+    }
+
 }
