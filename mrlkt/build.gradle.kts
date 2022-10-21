@@ -6,10 +6,6 @@ plugins {
     id("com.android.library")
 }
 
-repositories {
-    mavenCentral()
-}
-
 kotlin {
     android()
     iosX64()
