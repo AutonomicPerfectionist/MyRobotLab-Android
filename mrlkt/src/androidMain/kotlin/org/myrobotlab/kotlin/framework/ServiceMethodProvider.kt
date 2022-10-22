@@ -13,7 +13,6 @@ actual object ServiceMethodProvider {
         data: List<Any?>
     ): Any? {
         val serviceMethods = methods.filter { it.name == method && it.valueParameters.size == data.size}
-        println("serviceMethods: ${methods.filter { it.name == method }.map { it.valueParameters.size }}")
         val dataTypes = data.map { it?.let { it::class } }
 
         var compatibleServiceMethod: KCallable<*>? = null
