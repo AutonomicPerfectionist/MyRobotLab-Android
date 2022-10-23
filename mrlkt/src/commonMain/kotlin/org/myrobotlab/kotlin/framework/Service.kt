@@ -12,10 +12,20 @@ import org.myrobotlab.kotlin.framework.ServiceMethodProvider.methods
 
 import kotlin.reflect.KFunction1
 
+/**
+ * DSL method to provide a similar API to [ServiceMethod.subscribeTo()]
+ */
 infix fun <P> KFunction1<P, *>.subscribeTo(method: ServiceMethod) {
     TODO("Implement subscription")
 }
 
+/**
+ * Represents a handle to a service method, whether
+ * the service is local or remote.
+ *
+ * @param service The service instance this method belongs to
+ * @param methodName The name of this method
+ */
 data class ServiceMethod(val service: ServiceInterface, val methodName: String) {
     operator fun invoke(vararg params: Any?){
         val f = ::invoke
@@ -32,10 +42,29 @@ data class ServiceMethod(val service: ServiceInterface, val methodName: String) 
 
 @MrlClassMapping("org.myrobotlab.framework.interfaces.ServiceInterface")
 interface ServiceInterface {
+    /**
+     * The name of the service, as set by the user
+     * when starting a service.
+     */
     val name: String
 
+    /**
+     * Launch a new coroutine within the provided scope
+     * to handle message receiving.
+     *
+     * @param scope The scope to launch the inbox
+     * coroutine in.
+     */
     suspend fun runInbox(scope: CoroutineScope)
 
+    /**
+     * DSL method to get a handle to a service method
+     * based on the name of the method. This allows
+     * Kotlin services to provide the same DSL
+     * API as proxy services.
+     *
+     * @param methodName The name of the method to get a handle to
+     */
     operator fun get(methodName: String): ServiceMethod
 
 
