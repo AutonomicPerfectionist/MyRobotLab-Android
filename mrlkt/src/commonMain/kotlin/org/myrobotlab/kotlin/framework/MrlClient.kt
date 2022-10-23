@@ -3,7 +3,7 @@ package org.myrobotlab.kotlin.framework
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
 
-interface JsonSerde {
+expect class JsonSerde() {
     fun <T> deserialize(json: String): T
     fun <T> serialize(o: T): String
 }
@@ -11,7 +11,7 @@ interface JsonSerde {
 object MrlClient {
     val eventBus = MutableSharedFlow<Message>()
     var url: String = "localhost"
-    var serde: JsonSerde? = null
+    private val serde: JsonSerde = JsonSerde()
 
 
     fun connect() = runBlocking {
@@ -23,7 +23,7 @@ object MrlClient {
     }
 
     suspend fun connectCoroutine() {
-
+        TODO("Open a websocket connection within a coroutine")
     }
 
     suspend fun <R> callServiceCoroutine(name: String, method: String, vararg data: Any?): R? {
