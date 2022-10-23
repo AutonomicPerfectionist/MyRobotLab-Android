@@ -25,7 +25,7 @@ kotlin {
     
     sourceSets {
         val ktorVersion = "2.1.2"
-        val jacksonVersion = "2.11.1"
+        val jacksonVersion = "2.13.4"
 
         val commonMain by getting {
             dependencies {
@@ -48,6 +48,8 @@ kotlin {
                 implementation ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
                 implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
                 implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+                implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+                implementation ("com.fasterxml.jackson.module:jackson-module-no-ctor-deser:$jacksonVersion")
             }
         }
         val androidTest by getting {
