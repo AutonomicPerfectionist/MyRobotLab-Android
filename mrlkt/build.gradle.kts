@@ -25,13 +25,14 @@ kotlin {
     
     sourceSets {
         val ktorVersion = "2.1.2"
+        val jacksonVersion = "2.11.1"
 
         val commonMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-websockets:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
             }
         }
         val commonTest by getting {
@@ -43,7 +44,10 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
+                implementation ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+                implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+                implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
             }
         }
         val androidTest by getting {
