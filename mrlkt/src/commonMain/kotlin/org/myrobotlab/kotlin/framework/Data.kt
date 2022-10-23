@@ -21,8 +21,8 @@ data class Registration (
     val id: String,
     val name: String,
     val typeKey: String,
-    val state: String,
-    val interfaces: List<String>
+    val state: String = "",
+    val interfaces: List<String> = listOf()
 )
 
 @MrlClassMapping("org.myrobotlab.framework.DescribeResults")
