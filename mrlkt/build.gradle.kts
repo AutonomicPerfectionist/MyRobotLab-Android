@@ -32,7 +32,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-websockets:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
             }
         }
         val commonTest by getting {
@@ -50,6 +49,8 @@ kotlin {
                 implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
                 implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
                 implementation ("com.fasterxml.jackson.module:jackson-module-no-ctor-deser:$jacksonVersion")
+                implementation ("org.reflections:reflections:0.10.2")
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
             }
         }
         val androidTest by getting {
