@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter
 import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase
 import org.myrobotlab.kotlin.codec.CLASS_META_KEY
+import org.myrobotlab.kotlin.framework.MrlClassMapping
 import java.io.IOException
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 
 /**
  * A Jackson serializer that injects [CLASS_META_KEY]
@@ -106,7 +109,8 @@ class JacksonPolymorphicSerializer : BeanSerializerBase {
     ) {
         jsonGenerator.writeStartObject()
         serializeFields(o, jsonGenerator, serializerProvider)
-        jsonGenerator.writeStringField(CLASS_META_KEY, "kt:${o::class.qualifiedName}")
+        val typeKey = o::class.findAnnotation<MrlClassMapping>()?.javaClass ?: "kt:${o::class.qualifiedName}"
+        jsonGenerator.writeStringField(CLASS_META_KEY, typeKey)
         jsonGenerator.writeEndObject()
     }
 }
