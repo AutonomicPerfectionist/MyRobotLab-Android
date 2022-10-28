@@ -32,6 +32,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-websockets:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
             }
         }
         val commonTest by getting {
