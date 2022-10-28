@@ -1,6 +1,7 @@
 package org.myrobotlab.kotlin.framework
 
 import io.ktor.util.date.*
+import org.myrobotlab.kotlin.service.Runtime.runtimeID
 
 @MrlClassMapping("org.myrobotlab.framework.Message")
 data class Message(
@@ -22,8 +23,13 @@ data class Registration (
     val name: String,
     val typeKey: String,
     val state: String = "",
-    val interfaces: List<String> = listOf()
-)
+    val interfaces: List<String> = listOf(),
+    val service: ServiceInterface? = null
+) {
+    constructor(service: ServiceInterface): this(
+        runtimeID, service.name, "kt:${service::class.qualifiedName}", service = service)
+
+}
 
 @MrlClassMapping("org.myrobotlab.framework.DescribeResults")
 data class DescribeResults(
