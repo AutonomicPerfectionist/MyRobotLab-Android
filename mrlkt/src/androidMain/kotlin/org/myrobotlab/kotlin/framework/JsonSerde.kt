@@ -1,11 +1,10 @@
 package org.myrobotlab.kotlin.framework
 
-actual class JsonSerde {
-    actual fun <T> deserialize(json: String): T {
-        TODO("Not yet implemented")
-    }
+import org.myrobotlab.kotlin.codec.CodecUtils.Companion.fromJson
+import org.myrobotlab.kotlin.codec.CodecUtils.Companion.toJson
 
-    actual fun <T> serialize(o: T): String {
-        TODO("Not yet implemented")
-    }
+actual class JsonSerde {
+    actual inline fun <reified T> deserialize(json: String): T = json.fromJson()
+
+    actual fun <T> serialize(o: T): String = o.toJson()
 }
