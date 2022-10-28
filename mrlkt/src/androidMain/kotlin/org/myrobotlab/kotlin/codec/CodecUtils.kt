@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.myrobotlab.kotlin.codec.json.JacksonPolymorphicModule
+import kotlin.reflect.KClass
 
 
 const val CLASS_META_KEY = "class"
@@ -36,7 +38,7 @@ class CodecUtils {
          *
          * @see .USING_GSON
          */
-        private val mapper = ObjectMapper()
+        val mapper = ObjectMapper()
 
         /**
          * The [TypeFactory] used to generate type information for
@@ -65,6 +67,10 @@ class CodecUtils {
             //Make jackson behave like gson in that unknown properties are ignored
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
+
+        fun <T> T.toJson(): String = mapper.writeValueAsString(this)
+        fun <T : Any> String.fromJson(type: KClass<T>): T = mapper.readValue(this, type.java)
+        inline fun <reified T> String.fromJson(): T = mapper.readValue(this)
     }
 }
 
