@@ -1,7 +1,4 @@
-package org.myrobotlab.kotlin.framework
-
-import org.myrobotlab.kotlin.utils.BiMap
-
+package org.myrobotlab.kotlin.annotations
 
 /**
  * Marks the annotated class as being equivalent
@@ -17,10 +14,3 @@ import org.myrobotlab.kotlin.utils.BiMap
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class MrlClassMapping(val javaClass: String)
-
-/**
- * Maps Kotlin class names to Java class names
- * one-to-one. `mappings.inverse` instead maps Java names
- * to Kotlin names.
- */
-expect val mappings: BiMap<String, String>
