@@ -13,7 +13,7 @@ import org.myrobotlab.kotlin.codec.CLASS_META_KEY
 import org.myrobotlab.kotlin.codec.ForeignProcessUtils.isForeignTypeKey
 import org.myrobotlab.kotlin.codec.ForeignProcessUtils.languageId
 import org.myrobotlab.kotlin.codec.ForeignProcessUtils.languageSpecificTypeKey
-import org.myrobotlab.kotlin.framework.mappings
+import org.myrobotlab.kotlin.framework.classMappings
 import java.io.IOException
 
 /**
@@ -131,7 +131,7 @@ class JacksonPolymorphicDeserializer<T>(deserializer: JsonDeserializer<T>, clazz
             val normalizedType = if (typeAsString.isForeignTypeKey && typeAsString.languageId == "kt")
                 typeAsString.languageSpecificTypeKey
             else
-                mappings.inverse[typeAsString] ?: typeAsString
+                classMappings.inverse[typeAsString] ?: typeAsString
             Class.forName(normalizedType)
         } catch (e: ClassNotFoundException) {
             throw RuntimeException(e)
