@@ -4,6 +4,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
+    id("com.google.devtools.ksp") version "1.7.20-1.0.7"
 }
 
 kotlin {
@@ -11,6 +12,7 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+//    jvm()
 
     cocoapods {
         summary = "Some description for the Shared Module"
@@ -22,13 +24,15 @@ kotlin {
             baseName = "mrlkt"
         }
     }
-    
+
     sourceSets {
         val ktorVersion = "2.1.2"
         val jacksonVersion = "2.13.4"
 
         val commonMain by getting {
+            kotlin.srcDir(file("build/generated/ksp/android/androidRelease/kotlin"))
             dependencies {
+                implementation(project(":mrlkt-annotations"))
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-websockets:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -43,6 +47,7 @@ kotlin {
 
 
         val androidMain by getting {
+//            kotlin.srcDir(file("build/generated/ksp/android/androidRelease/kotlin"))
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
                 implementation ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
@@ -55,6 +60,7 @@ kotlin {
             }
         }
         val androidTest by getting {
+//            kotlin.srcDir(file("build/generated/ksp/android/androidDebug/kotlin"))
             dependencies {
 
             }
@@ -82,13 +88,15 @@ kotlin {
 
 android {
     namespace = "org.myrobotlab"
-    compileSdk = 32
+    compileSdk = 33
     defaultConfig {
         minSdk = 24
-        targetSdk = 32
+        targetSdk = 33
     }
 }
 dependencies {
+    //    implementation(project(mapOf("path" to ":mrlkt-annotations")))
+    add("kspAndroid", project(":mrlkt-ksp"))
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.13.2")
 }
