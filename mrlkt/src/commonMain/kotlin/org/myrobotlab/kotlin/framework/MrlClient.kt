@@ -43,6 +43,8 @@ object MrlClient {
 
             while (true) {
                 val receivedFrame = incoming.receive() as? Frame.Text ?: continue
+                if (receivedFrame.readText() == "X")
+                    continue
                 val receivedMessage = serde.deserialize<Message>(receivedFrame.readText())
                 println("Received message: $receivedMessage")
                 eventBus.emit(receivedMessage)
@@ -51,7 +53,7 @@ object MrlClient {
     }
 
     suspend fun callServicesAPI(message: Message): String {
-        val ret = client.get("$url/api/service/${message.name}/${message.method}") {
+        val ret = client.get("http://$url/api/service/${message.name}/${message.method}") {
             headers {
                 append("Content-Type", "application/json")
             }
