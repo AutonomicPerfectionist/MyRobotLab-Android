@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace = "org.myrobotlab.android"
-    compileSdk = 32
+    compileSdk = 33
     defaultConfig {
         applicationId = "org.myrobotlab.android"
         minSdk = 24
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
     }
@@ -17,7 +17,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.0"
+        kotlinCompilerExtensionVersion = "1.3.2"
     }
     packagingOptions {
         resources {
@@ -40,4 +40,5 @@ dependencies {
     implementation("androidx.compose.material:material:1.2.1")
     implementation("androidx.activity:activity-compose:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("androidx.fragment:fragment-ktx:1.6.0-alpha03")
 }
