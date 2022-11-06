@@ -16,8 +16,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.myrobotlab.Greeting
+import org.myrobotlab.kotlin.framework.MrlClient
+import org.myrobotlab.kotlin.service.Runtime.initRuntime
+import org.myrobotlab.kotlin.service.Runtime.runtimeID
+import org.myrobotlab.kotlin.utils.Url
 
 @Composable
 fun MyApplicationTheme(
@@ -61,6 +66,11 @@ fun MyApplicationTheme(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initRuntime("obsidian")
+        MrlClient.url = Url("10.0.2.2", 8888)
+        lifecycleScope.launch {
+            MrlClient.connectCoroutine()
+        }
         setContent {
             MyApplicationTheme {
                 Surface(
@@ -72,7 +82,8 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(true) {
                         scope.launch {
                             text = try {
-                                Greeting().greeting()
+                                //MrlClient.callServiceCoroutine("runtime", "getUptime") ?: "Error"
+                                "help"
                             } catch (e: Exception) {
                                 e.localizedMessage ?: "error"
                             }
