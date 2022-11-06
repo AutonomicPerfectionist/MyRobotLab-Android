@@ -1,6 +1,7 @@
 package org.myrobotlab.kotlin.framework
 
 import io.ktor.util.date.*
+import org.myrobotlab.kotlin.annotations.MrlClassMapping
 import org.myrobotlab.kotlin.service.Runtime.runtimeID
 
 @MrlClassMapping("org.myrobotlab.framework.Message")

@@ -5,6 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.myrobotlab.kotlin.annotations.MrlClassMapping
 import org.myrobotlab.kotlin.framework.MrlClient.eventBus
 import org.myrobotlab.kotlin.framework.MrlClient.sendCommand
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.callMethod
