@@ -7,8 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.myrobotlab.kotlin.codec.CodecUtils.Companion.fromJson
 import org.myrobotlab.kotlin.codec.json.JacksonPolymorphicModule
+import org.myrobotlab.kotlin.framework.Message
+import org.myrobotlab.kotlin.framework.MrlClient
 import kotlin.reflect.KClass
+import kotlin.reflect.typeOf
 
 
 const val CLASS_META_KEY = "class"
@@ -68,9 +72,29 @@ class CodecUtils {
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
 
-        fun <T> T.toJson(): String = mapper.writeValueAsString(this)
+        fun <T> T.toJson(): String {
+            if (this is Message) {
+                val newMsg = this.copy()
+                for (index in newMsg.data.indices) {
+                    newMsg.data[index] = mapper.writeValueAsString(newMsg.data[index])
+                }
+            }
+            return mapper.writeValueAsString(this)
+        }
         fun <T : Any> String.fromJson(type: KClass<T>): T = mapper.readValue(this, type.java)
-        inline fun <reified T> String.fromJson(): T = mapper.readValue(this)
+        inline fun <reified T> String.fromJson(): T {
+            val obj: T = mapper.readValue(this)
+            if (obj is Message) {
+                for(i in obj.data.indices) {
+                    val dataStr = obj.data[i]
+                    if (dataStr is String) {
+                        MrlClient.logger.info("Converting data $dataStr")
+                        obj.data[i] = dataStr.fromJson(Any::class)
+                    }
+                }
+            }
+            return obj
+        }
     }
 }
 
