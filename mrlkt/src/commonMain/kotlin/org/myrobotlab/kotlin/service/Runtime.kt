@@ -1,7 +1,6 @@
 package org.myrobotlab.kotlin.service
 
-import org.myrobotlab.kotlin.framework.Registration
-import org.myrobotlab.kotlin.framework.Service
+import org.myrobotlab.kotlin.framework.*
 import org.myrobotlab.kotlin.utils.ImmutableMapWrapper
 
 object Runtime: Service("runtime") {
@@ -22,11 +21,16 @@ object Runtime: Service("runtime") {
         require(!hasInit) {"Runtime may only be initialized once"}
         hasInit = true
         runtimeID = id
-        register(Registration(this))
+        register(Registration(runtimeID, "runtime", "org.myrobotlab.service.Runtime"))
     }
 
 
     fun register(registration: Registration) {
         mutableRegistry[registration.name] = registration
+    }
+
+    fun describe(uuid: String, query: String): DescribeResults {
+        MrlClient.logger.info("Calling describe")
+        return DescribeResults(runtimeID, "", mapOf(), null, null, registry.values.toList())
     }
 }
