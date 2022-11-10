@@ -68,6 +68,12 @@ interface ServiceInterface {
      */
     operator fun get(methodName: String): ServiceMethod
 
+    /**
+     * Add a listener to this service, the given listener
+     * will be notified when the topic method is invoked.
+     */
+    fun addListener(listener: MRLListener)
+
 
 
 }
@@ -84,7 +90,7 @@ interface ServiceInterface {
  */
 @MrlClassMapping("org.myrobotlab.framework.Service")
 abstract class Service(override val name: String) : ServiceInterface {
-    val mrlListeners = mutableMapOf<String, List<MRLListener>>()
+    val mrlListeners = mutableMapOf<String, MutableList<MRLListener>>()
     private val serviceMethods = methods.associateBy({it.name}, {ServiceMethod(this, it.name)})
 
     override operator fun get(methodName: String): ServiceMethod =
@@ -104,5 +110,10 @@ abstract class Service(override val name: String) : ServiceInterface {
                 }
             }
         }
+    }
+
+    override fun addListener(listener: MRLListener) {
+        MrlClient.logger.info("Adding listener: $listener")
+        mrlListeners.getOrPut(listener.topicMethod) { mutableListOf() }.add(listener)
     }
 }
