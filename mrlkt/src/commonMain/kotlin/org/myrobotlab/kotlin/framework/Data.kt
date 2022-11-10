@@ -8,11 +8,11 @@ import org.myrobotlab.kotlin.service.Runtime.runtimeID
 data class Message(
     val name: String,
     val method: String,
-    val data: List<Any?>,
+    val data: MutableList<Any?>,
     val sender: String = "",
     val sendingMethod: String = "",
     val historyList: List<String> = listOf(),
-    val status: String = "",
+    val status: String? = null,
     val encoding: String = "",
     val msgId: Long = getTimeMillis()
 
@@ -23,7 +23,7 @@ data class Registration (
     val id: String,
     val name: String,
     val typeKey: String,
-    val state: String = "",
+    val state: String = "{}",
     val interfaces: List<String> = listOf(),
     val service: ServiceInterface? = null
 ) {
@@ -38,7 +38,7 @@ data class DescribeResults(
     val uuid: String,
     val request: Map<String, Any?>,
     val platform: Any?,
-    val status: String,
+    val status: String?,
     val registrations: List<Registration>
 )
 
