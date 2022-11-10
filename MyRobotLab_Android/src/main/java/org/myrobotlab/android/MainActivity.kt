@@ -1,6 +1,7 @@
 package org.myrobotlab.android
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -19,10 +20,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.myrobotlab.Greeting
+import org.myrobotlab.kotlin.framework.Logger
 import org.myrobotlab.kotlin.framework.MrlClient
 import org.myrobotlab.kotlin.service.Runtime.initRuntime
 import org.myrobotlab.kotlin.service.Runtime.runtimeID
 import org.myrobotlab.kotlin.utils.Url
+import org.myrobotlab.kotlin.service.Runtime
 
 @Composable
 fun MyApplicationTheme(
@@ -66,9 +69,16 @@ fun MyApplicationTheme(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initRuntime("obsidian")
+        initRuntime("android")
         MrlClient.url = Url("10.0.2.2", 8888)
+        MrlClient.logger = object: Logger {
+            override fun info(toLog: String) {
+                Log.e("MrlClient", toLog)
+            }
+
+        }
         lifecycleScope.launch {
+            Runtime.runInbox(this)
             MrlClient.connectCoroutine()
         }
         setContent {
