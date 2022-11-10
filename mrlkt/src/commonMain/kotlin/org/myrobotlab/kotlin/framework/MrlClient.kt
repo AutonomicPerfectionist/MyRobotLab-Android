@@ -9,6 +9,8 @@ import io.ktor.http.*
 import io.ktor.util.reflect.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.myrobotlab.kotlin.service.Runtime
 import org.myrobotlab.kotlin.utils.Url
@@ -18,36 +20,76 @@ expect class JsonSerde() {
     fun <T> serialize(o: T): String
 }
 
+interface Logger {
+    fun info(toLog: String)
+}
+
 object MrlClient {
     val eventBus = MutableSharedFlow<Message>()
     var url = Url("localhost", 8888)
+    var logger: Logger = object : Logger {
+        override fun info(toLog: String) {
+            println(toLog)
+        }
+    }
     val serde: JsonSerde = JsonSerde()
     private val client = HttpClient(CIO) {
         install(WebSockets) {
-            pingInterval = 20_000
+            pingInterval = -1L
         }
     }
+
+    private var session: WebSocketSession? = null
+    private val sendChannel: Channel<Message> = Channel()
 
 
     fun connect() = runBlocking {
         connectCoroutine()
     }
 
-    inline fun <reified R> callService(name: String, method: String, vararg data: Any?): R? = runBlocking {
-        callServiceCoroutine(name, method, data)
-    }
+    inline fun <reified R> callService(name: String, method: String, vararg data: Any?): R? =
+        runBlocking {
+            callServiceCoroutine(name, method, data)
+        }
 
     suspend fun connectCoroutine() {
-        client.webSocket(method = HttpMethod.Get, host = url.host, port = url.port, path = "/api/messages?id=${Runtime.runtimeID}") {
+        client.webSocket(
+            method = HttpMethod.Get,
+            host = url.host,
+            port = url.port,
+            path = "/api/messages?id=${Runtime.runtimeID}"
+        ) {
+            try {
+            session = this
+            val inputRoutine = launch {
+                for (receivedFrame in incoming) {
+                    if (receivedFrame !is Frame.Text) {
 
+                        continue
+                    }
+                    val text = receivedFrame.readText()
+                    logger.info("Received text: $text")
+                    if (text == "X") {
+                        logger.info("Heartbeat detected")
+                        continue
+                    }
+                    val receivedMessage = serde.deserialize<Message>(text)
+                    logger.info("Received message: $receivedMessage")
+                    eventBus.emit(receivedMessage)
+                }
+            }
 
-            while (true) {
-                val receivedFrame = incoming.receive() as? Frame.Text ?: continue
-                if (receivedFrame.readText() == "X")
-                    continue
-                val receivedMessage = serde.deserialize<Message>(receivedFrame.readText())
-                println("Received message: $receivedMessage")
-                eventBus.emit(receivedMessage)
+            val outputRoutine = launch {
+                for (message in sendChannel) {
+                    logger.info("Sending message: $message")
+                    send(serde.serialize(message))
+                }
+            }
+
+                inputRoutine.join()
+                outputRoutine.cancelAndJoin()
+            } catch (e: ClosedReceiveChannelException) {
+                logger.info("Session closed")
             }
         }
     }
@@ -59,18 +101,23 @@ object MrlClient {
             }
             setBody(serde.serialize(message.data))
         }
-        return  ret.bodyAsText()
+        return ret.bodyAsText()
     }
 
-    suspend inline fun <reified R> callServiceCoroutine(name: String, method: String, vararg data: Any?): R? {
-        val message = Message(name=name, method=method, data=data.asList())
-        println("Calling service: $message")
+    suspend inline fun <reified R> callServiceCoroutine(
+        name: String,
+        method: String,
+        vararg data: Any?
+    ): R? {
+        val message = Message(name = name, method = method, data = data.asList().toMutableList())
+        logger.info("Calling service: $message")
 
         return serde.deserialize(callServicesAPI(message))
     }
 
     suspend fun sendCommand(name: String, method: String, data: List<Any?>) {
-        TODO("Need to implement sendCommand()")
+
+        sendChannel.send(Message(name, method, data.toMutableList()))
     }
 
 }
