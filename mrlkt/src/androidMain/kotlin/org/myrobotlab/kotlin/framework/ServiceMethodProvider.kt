@@ -8,10 +8,10 @@ actual object ServiceMethodProvider {
     actual val Service.methods: List<KCallable<*>>
         get() = this::class.members as List<KCallable<*>>
 
-    actual fun Service.callMethod(
+    actual fun <R> Service.callMethod(
         method: String,
         data: List<Any?>
-    ): Any? {
+    ): R? {
         val serviceMethods = methods.filter { it.name == method && it.valueParameters.size == data.size}
         val dataTypes = data.map { it?.let { it::class } }
 
@@ -45,7 +45,7 @@ actual object ServiceMethodProvider {
             throw RuntimeException("Cannot find compatible method")
         }
         // TODO Test whether receiver is needed, test whether method is suspending or not
-        return compatibleServiceMethod.call(this, *data.toTypedArray())
+        return compatibleServiceMethod.call(this, *data.toTypedArray()) as R?
 
 
     }

@@ -1,8 +1,6 @@
 package org.myrobotlab.kotlin.framework
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
@@ -28,7 +26,7 @@ infix fun <P> KFunction1<P, *>.subscribeTo(method: ServiceMethod) {
  * @param methodName The name of this method
  */
 data class ServiceMethod(val service: ServiceInterface, val methodName: String) {
-    operator fun invoke(vararg params: Any?){
+    operator fun invoke(vararg params: Any?) {
         val f = ::invoke
         println(f)
 
@@ -74,7 +72,9 @@ interface ServiceInterface {
      */
     fun addListener(listener: MRLListener)
 
+    suspend fun <R> invoke(message: Message): R?
 
+    suspend fun <R> invoke(method: String, vararg data: Any?): R?
 
 }
 
@@ -91,7 +91,7 @@ interface ServiceInterface {
 @MrlClassMapping("org.myrobotlab.framework.Service")
 abstract class Service(override val name: String) : ServiceInterface {
     val mrlListeners = mutableMapOf<String, MutableList<MRLListener>>()
-    private val serviceMethods = methods.associateBy({it.name}, {ServiceMethod(this, it.name)})
+    private val serviceMethods = methods.associateBy({ it.name }, { ServiceMethod(this, it.name) })
 
     override operator fun get(methodName: String): ServiceMethod =
         serviceMethods[methodName] ?: throw NoSuchElementException()
@@ -99,21 +99,32 @@ abstract class Service(override val name: String) : ServiceInterface {
     override suspend fun runInbox(scope: CoroutineScope) {
         scope.launch {
             println("Launched")
-            eventBus.filter { it.name == name }.takeWhile { it.method != "shutdown" }.collect { message->
+            eventBus.filter { it.name == name }.takeWhile { it.method != "shutdown" }
+                .collect { message ->
 
-                if (message.method in this@Service.methods.map { method -> method.name }) {
-                    val ret = this@Service.callMethod(message.method, message.data)
-                    mrlListeners[message.method]?.forEach { listener ->
-                        sendCommand(listener.callbackName, listener.callbackMethod, listOf(ret))
-
+                    if (message.method in this@Service.methods.map { method -> method.name }) {
+                        this@Service.invoke<Any?>(message)
                     }
                 }
-            }
         }
     }
 
     override fun addListener(listener: MRLListener) {
         MrlClient.logger.info("Adding listener: $listener")
         mrlListeners.getOrPut(listener.topicMethod) { mutableListOf() }.add(listener)
+    }
+
+    override suspend fun <R> invoke(message: Message): R? {
+        require(message.name == name) { "Attempting to invoke method on incorrect service" }
+        return invoke(message.method, *message.data.toTypedArray())
+    }
+
+    override suspend fun <R> invoke(method: String, vararg data: Any?): R? {
+        val ret = this@Service.callMethod<R>(method, data.toList())
+        mrlListeners[method]?.forEach { listener ->
+            sendCommand(listener.callbackName, listener.callbackMethod, listOf(ret))
+
+        }
+        return ret
     }
 }

@@ -28,5 +28,5 @@ expect object ServiceMethodProvider {
      * @return The return value of the called method, Unit if method does not return anything
      * @throws RuntimeException if no compatible method found
      */
-    fun Service.callMethod(method: String, data:List<Any?>): Any?
+    fun <R> Service.callMethod(method: String, data:List<Any?>): R?
 }
