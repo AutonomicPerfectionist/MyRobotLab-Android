@@ -23,6 +23,10 @@ class ServiceTest {
         fun testMethodWithParams(param1: String): String {
             return "test: $param1"
         }
+
+        override fun registerSelf() {
+            // Don't do anything since we aren't starting Runtime
+        }
     }
 
     @Test
@@ -30,7 +34,7 @@ class ServiceTest {
         val listener = MRLListener("testMethod", "callbackService", "callbackMethod")
         val t = spyk(TestService("test"))
 
-        t.mrlListeners.getOrPut(listener.topicMethod) { mutableListOf(listener) }
+        t.addListener(listener)
         runBlocking {
             t.runInbox(this)
             println("Inbox running")
@@ -66,7 +70,7 @@ class ServiceTest {
         val listener = MRLListener("testMethod", "callbackService", "callbackMethod")
         val t = spyk(TestService("test"))
 
-        t.mrlListeners.getOrPut(listener.topicMethod) { mutableListOf(listener) }
+        t.addListener(listener)
         runBlocking {
             t.runInbox(this)
             println("Inbox running")

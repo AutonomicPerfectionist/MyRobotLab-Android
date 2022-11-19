@@ -16,19 +16,23 @@ class ServiceMethodProviderTest {
         fun testMethodWithParams(param1: String): String {
             return "test: $param1"
         }
+
+        override fun registerSelf() {
+            // Don't do anything since we don't init Runtime
+        }
     }
 
     @Test
     internal fun testExecuteMethodNoParams() {
         val t = TestService()
-        val r = t.callMethod("testMethod", listOf())
+        val r = t.callMethod<String>("testMethod", listOf())
         assertEquals("test", r)
     }
 
     @Test
     internal fun testExecuteMethodOneParam() {
         val t = TestService()
-        val r = t.callMethod("testMethodWithParams", listOf("test1"))
+        val r = t.callMethod<String>("testMethodWithParams", listOf("test1"))
         assertEquals("test: test1", r)
     }
 
@@ -36,7 +40,7 @@ class ServiceMethodProviderTest {
     internal fun testExecuteMethodOneParamWithNull() {
         val t = TestService()
         assertFailsWith(RuntimeException::class) {
-            t.callMethod("testMethodWithParams", listOf(null))
+            t.callMethod<String>("testMethodWithParams", listOf(null))
         }
     }
 }
