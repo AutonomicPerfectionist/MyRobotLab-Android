@@ -35,8 +35,8 @@ class ServiceTest {
             t.runInbox(this)
             println("Inbox running")
             delay(100)
-            eventBus.emit(Message("test", "testMethod", listOf()))
-            eventBus.emit(Message("test", "shutdown", listOf()))
+            eventBus.emit(Message("test", "testMethod", mutableListOf()))
+            eventBus.emit(Message("test", "shutdown", mutableListOf()))
 
         }
 
@@ -52,9 +52,9 @@ class ServiceTest {
             t2.runInbox(this)
             println("Inbox running")
             delay(100)
-            eventBus.emit(Message("test", "testMethod", listOf()))
-            eventBus.emit(Message("test", "shutdown", listOf()))
-            eventBus.emit(Message("test2", "shutdown", listOf()))
+            eventBus.emit(Message("test", "testMethod", mutableListOf()))
+            eventBus.emit(Message("test", "shutdown", mutableListOf()))
+            eventBus.emit(Message("test2", "shutdown", mutableListOf()))
 
         }
 
@@ -71,8 +71,8 @@ class ServiceTest {
             t.runInbox(this)
             println("Inbox running")
             delay(100)
-            eventBus.emit(Message("test", "testMethod", listOf()))
-            eventBus.emit(Message("test", "shutdown", listOf()))
+            eventBus.emit(Message("test", "testMethod", mutableListOf()))
+            eventBus.emit(Message("test", "shutdown", mutableListOf()))
 
         }
 

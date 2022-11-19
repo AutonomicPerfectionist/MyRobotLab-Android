@@ -152,7 +152,7 @@ class JacksonPolymorphicModuleTest {
     fun testMessagePolymorphic() {
         val message = Message(
             "runtime", "register",
-            listOf(Registration("runtime", "obsidian", "org.myrobotlab.service.Runtime"))
+            mutableListOf(Registration("runtime", "obsidian", "org.myrobotlab.service.Runtime"))
         )
         val jsonString = polymorphicMapper.writeValueAsString(message)
         log.debug("Encoded test string: $jsonString")
