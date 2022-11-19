@@ -72,8 +72,27 @@ interface ServiceInterface {
      */
     fun addListener(listener: MRLListener)
 
+    /**
+     * Invoke a method of this service using a message. The message must
+     * have the same destination name as the name of this service.
+     * All subscribed listeners will be notified with the results
+     * of the invocation.
+     *
+     * @param message: The message carrying the method and parameters
+     * @return The result of the method call
+     */
     suspend fun <R> invoke(message: Message): R?
 
+
+    /**
+     * Invoke a method of this service using a method name and any arguments.
+     * All subscribed listeners will be notified with the results
+     * of the invocation.
+     *
+     * @param method: The method to invoke
+     * @param data: Any parameters to pass to the method
+     * @return The result of the method call
+     */
     suspend fun <R> invoke(method: String, vararg data: Any?): R?
 
 }
@@ -122,6 +141,9 @@ abstract class Service(override val name: String) : ServiceInterface {
     override suspend fun <R> invoke(method: String, vararg data: Any?): R? {
         val ret = this@Service.callMethod<R>(method, data.toList())
         mrlListeners[method]?.forEach { listener ->
+            //TODO: Switch to emitting into the event bus, which will
+            //  handle sending commands to remote services as well as
+            //  to local ones
             sendCommand(listener.callbackName, listener.callbackMethod, listOf(ret))
 
         }
