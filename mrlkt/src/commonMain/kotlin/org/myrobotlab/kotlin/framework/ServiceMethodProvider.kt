@@ -17,6 +17,13 @@ expect object ServiceMethodProvider {
      */
     val Service.methods:List<ServiceMethod>
 
+    /**
+     * Construct a new service from this class with the given name.
+     * This class must have a primary constructor with a single
+     * String parameter called `name` for this method to work.
+     *
+     * @param name The name of the new service
+     */
     fun <T: ServiceInterface> KClass<T>.constructService(name: String): T
 
 
