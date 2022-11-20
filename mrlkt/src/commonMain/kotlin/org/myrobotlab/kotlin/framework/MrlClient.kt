@@ -26,6 +26,7 @@ interface Logger {
 
 object MrlClient {
     val eventBus = MutableSharedFlow<Message>()
+    private var websocketJob: Job? = null
     var url = Url("localhost", 8888)
     var logger: Logger = object : Logger {
         override fun info(toLog: String) {
@@ -44,7 +45,7 @@ object MrlClient {
 
 
     fun connect() = runBlocking {
-        connectCoroutine()
+        connectCoroutine(this)
     }
 
     inline fun <reified R> callService(name: String, method: String, vararg data: Any?): R? =
@@ -52,44 +53,48 @@ object MrlClient {
             callServiceCoroutine(name, method, data)
         }
 
-    suspend fun connectCoroutine() {
+    suspend fun connectCoroutine(scope: CoroutineScope) {
+        websocketJob = scope.async {
         client.webSocket(
             method = HttpMethod.Get,
             host = url.host,
             port = url.port,
             path = "/api/messages?id=${Runtime.runtimeID}"
         ) {
-            try {
-            session = this
-            val inputRoutine = launch {
-                for (receivedFrame in incoming) {
-                    if (receivedFrame !is Frame.Text) {
 
-                        continue
+                try {
+                    session = this@webSocket
+                    val inputRoutine = launch {
+                        for (receivedFrame in incoming) {
+                            if (receivedFrame !is Frame.Text) {
+
+                                continue
+                            }
+                            val text = receivedFrame.readText()
+                            logger.info("Received text: $text")
+                            if (text == "X") {
+                                logger.info("Heartbeat detected")
+                                continue
+                            }
+                            val receivedMessage = serde.deserialize<Message>(text)
+                            logger.info("Received message: $receivedMessage")
+                            eventBus.emit(receivedMessage)
+                        }
                     }
-                    val text = receivedFrame.readText()
-                    logger.info("Received text: $text")
-                    if (text == "X") {
-                        logger.info("Heartbeat detected")
-                        continue
+
+                    val outputRoutine = launch {
+                        for (message in sendChannel) {
+                            val messageStr = serde.serialize(message)
+                            logger.info("Sending message: $messageStr")
+                            send(messageStr)
+                        }
                     }
-                    val receivedMessage = serde.deserialize<Message>(text)
-                    logger.info("Received message: $receivedMessage")
-                    eventBus.emit(receivedMessage)
-                }
-            }
 
-            val outputRoutine = launch {
-                for (message in sendChannel) {
-                    logger.info("Sending message: $message")
-                    send(serde.serialize(message))
+                    inputRoutine.join()
+                    outputRoutine.cancelAndJoin()
+                } catch (e: ClosedReceiveChannelException) {
+                    logger.info("Session closed")
                 }
-            }
-
-                inputRoutine.join()
-                outputRoutine.cancelAndJoin()
-            } catch (e: ClosedReceiveChannelException) {
-                logger.info("Session closed")
             }
         }
     }
