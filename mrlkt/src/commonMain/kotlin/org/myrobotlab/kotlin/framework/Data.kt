@@ -3,6 +3,7 @@ package org.myrobotlab.kotlin.framework
 import io.ktor.util.date.*
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
 import org.myrobotlab.kotlin.service.Runtime.runtimeID
+import kotlin.jvm.Transient
 
 @MrlClassMapping("org.myrobotlab.framework.Message")
 data class Message(
@@ -24,7 +25,8 @@ data class Registration (
     val name: String,
     val typeKey: String,
     val state: String = "{}",
-    val interfaces: List<String> = listOf(),
+    val interfaces: List<String> = listOf("org.myrobotlab.framework.interfaces.ServiceInterface"),
+    @Transient
     val service: ServiceInterface? = null
 ) {
     constructor(service: ServiceInterface): this(
