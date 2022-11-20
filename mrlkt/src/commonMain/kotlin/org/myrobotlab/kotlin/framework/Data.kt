@@ -2,6 +2,7 @@ package org.myrobotlab.kotlin.framework
 
 import io.ktor.util.date.*
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
+import org.myrobotlab.kotlin.framework.ServiceMethodProvider.mrlInterfaceNames
 import org.myrobotlab.kotlin.service.Runtime.runtimeID
 import kotlin.jvm.Transient
 
@@ -30,7 +31,7 @@ data class Registration (
     val service: ServiceInterface? = null
 ) {
     constructor(service: ServiceInterface): this(
-        runtimeID, service.name, service.typeKey, service = service)
+        runtimeID, service.name, service.typeKey, service = service, interfaces = service.mrlInterfaceNames)
 
 }
 
