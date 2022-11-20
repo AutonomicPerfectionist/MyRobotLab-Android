@@ -44,14 +44,17 @@ object Runtime: Service("runtime") {
     }
 
     suspend fun <R : ServiceInterface> start(name: String, type: KClass<R>): R? = coroutineScope {
-        val old = mutableRegistry.getOrPut(name) {
+        val old = Runtime.registry[name]?.service ?: suspend {
             val service = type.constructService(name)
             service.start(this)
-            return@getOrPut Registration(runtimeID, name, "kt:${type.qualifiedName}", service = service)
+            Runtime.invoke<Unit>("register",
+                Registration(runtimeID,
+                    name,
+                    "kt:${type.qualifiedName}", service = service))
 
         }
         if (old::class == type) {
-            return@coroutineScope old.service as R
+            return@coroutineScope old as R
         } else {
             return@coroutineScope null
         }
