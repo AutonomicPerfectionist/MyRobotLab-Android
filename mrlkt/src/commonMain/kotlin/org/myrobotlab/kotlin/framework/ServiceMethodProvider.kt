@@ -15,7 +15,7 @@ expect object ServiceMethodProvider {
      * An extension property that lists the available
      * methods to call on a service
      */
-    val Service.methods:List<KCallable<*>>
+    val Service.methods:List<ServiceMethod>
 
     fun <T: ServiceInterface> KClass<T>.constructService(name: String): T
 
@@ -32,5 +32,5 @@ expect object ServiceMethodProvider {
      * @return The return value of the called method, Unit if method does not return anything
      * @throws RuntimeException if no compatible method found
      */
-    fun <R> Service.callMethod(method: String, data:List<Any?>): R?
+    suspend fun <R> Service.callMethod(method: String, data:List<Any?>): R?
 }
