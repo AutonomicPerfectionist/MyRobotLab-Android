@@ -2,6 +2,7 @@ package org.myrobotlab.kotlin.framework
 
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.valueParameters
 
 actual object ServiceMethodProvider {
@@ -48,5 +49,11 @@ actual object ServiceMethodProvider {
         return compatibleServiceMethod.call(this, *data.toTypedArray()) as R?
 
 
+    }
+
+    actual fun <T : ServiceInterface> KClass<T>.constructService(
+        name: String
+    ): T {
+        return this.primaryConstructor?.call(name) ?: throw RuntimeException("No primary constructor with one name parameter found")
     }
 }

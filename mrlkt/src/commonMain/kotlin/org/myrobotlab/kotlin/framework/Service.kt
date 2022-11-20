@@ -8,6 +8,7 @@ import org.myrobotlab.kotlin.framework.MrlClient.eventBus
 import org.myrobotlab.kotlin.framework.MrlClient.sendCommand
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.callMethod
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.methods
+import org.myrobotlab.kotlin.service.Runtime
 
 import kotlin.reflect.KFunction1
 
@@ -95,6 +96,8 @@ interface ServiceInterface {
      */
     suspend fun <R> invoke(method: String, vararg data: Any?): R?
 
+    suspend fun start(scope: CoroutineScope)
+
 }
 
 /**
@@ -109,7 +112,7 @@ interface ServiceInterface {
  */
 @MrlClassMapping("org.myrobotlab.framework.Service")
 abstract class Service(override val name: String) : ServiceInterface {
-    val mrlListeners = mutableMapOf<String, MutableList<MRLListener>>()
+    private val mrlListeners = mutableMapOf<String, MutableList<MRLListener>>()
     private val serviceMethods = methods.associateBy({ it.name }, { ServiceMethod(this, it.name) })
 
     override operator fun get(methodName: String): ServiceMethod =
@@ -148,5 +151,9 @@ abstract class Service(override val name: String) : ServiceInterface {
 
         }
         return ret
+    }
+
+    override suspend fun start(scope: CoroutineScope) {
+        runInbox(scope)
     }
 }

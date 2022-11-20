@@ -16,10 +16,6 @@ class ServiceMethodProviderTest {
         fun testMethodWithParams(param1: String): String {
             return "test: $param1"
         }
-
-        override fun registerSelf() {
-            // Don't do anything since we don't init Runtime
-        }
     }
 
     @Test

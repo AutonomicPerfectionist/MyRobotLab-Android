@@ -1,6 +1,7 @@
 package org.myrobotlab.kotlin.framework
 
 import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
 
 /**
  * This class provides information on service methods
@@ -15,6 +16,9 @@ expect object ServiceMethodProvider {
      * methods to call on a service
      */
     val Service.methods:List<KCallable<*>>
+
+    fun <T: ServiceInterface> KClass<T>.constructService(name: String): T
+
 
     /**
      * An extension method that allows any available method from a service
