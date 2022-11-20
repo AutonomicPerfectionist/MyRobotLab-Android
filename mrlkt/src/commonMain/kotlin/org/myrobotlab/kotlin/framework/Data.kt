@@ -30,7 +30,7 @@ data class Registration (
     val service: ServiceInterface? = null
 ) {
     constructor(service: ServiceInterface): this(
-        runtimeID, service.name, "kt:${service::class.qualifiedName}", service = service)
+        runtimeID, service.name, service.typeKey, service = service)
 
 }
 
