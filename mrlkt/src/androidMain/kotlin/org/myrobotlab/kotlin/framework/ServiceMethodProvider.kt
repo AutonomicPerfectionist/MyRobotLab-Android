@@ -1,17 +1,24 @@
 package org.myrobotlab.kotlin.framework
 
+import org.myrobotlab.kotlin.annotations.MrlClassMapping
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.callSuspend
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.full.valueParameters
+import kotlin.reflect.full.*
 import kotlin.reflect.jvm.javaMethod
 
 actual object ServiceMethodProvider {
-    actual val Service.methods: List<ServiceMethod>
+    actual val ServiceInterface.mrlInterfaceNames: List<String>
+        get() {
+            return this::class.allSuperclasses.mapNotNull {
+                if(it.java.isInterface && it.hasAnnotation<MrlClassMapping>())
+                    it.findAnnotation<MrlClassMapping>()?.javaClass
+                else null
+            }
+        }
+
+    actual val ServiceInterface.methods: List<ServiceMethod>
         get() {
             val classMembers = (this::class.members as List<KCallable<*>>).map {
                 ServiceMethod(this, it.name,
@@ -34,7 +41,7 @@ actual object ServiceMethodProvider {
             return classMembers + getters + setters
         }
 
-    actual suspend fun <R> Service.callMethod(
+    actual suspend fun <R> ServiceInterface.callMethod(
         method: String,
         data: List<Any?>
     ): R? {

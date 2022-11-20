@@ -2,6 +2,7 @@ package org.myrobotlab.kotlin.framework
 
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
+import org.myrobotlab.kotlin.annotations.MrlClassMapping
 
 /**
  * This class provides information on service methods
@@ -15,7 +16,15 @@ expect object ServiceMethodProvider {
      * An extension property that lists the available
      * methods to call on a service
      */
-    val Service.methods:List<ServiceMethod>
+    val ServiceInterface.methods:List<ServiceMethod>
+
+    /**
+     * The list of interfaces implemented
+     * by the service that have a Java-land equivalent
+     * (denoted by the [MrlClassMapping] annotation on the interface class).
+     *
+     */
+    val ServiceInterface.mrlInterfaceNames: List<String>
 
     /**
      * Construct a new service from this class with the given name.
@@ -39,5 +48,5 @@ expect object ServiceMethodProvider {
      * @return The return value of the called method, Unit if method does not return anything
      * @throws RuntimeException if no compatible method found
      */
-    suspend fun <R> Service.callMethod(method: String, data:List<Any?>): R?
+    suspend fun <R> ServiceInterface.callMethod(method: String, data:List<Any?>): R?
 }
