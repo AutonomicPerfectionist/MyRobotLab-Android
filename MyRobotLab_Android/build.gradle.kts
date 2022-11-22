@@ -41,4 +41,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("androidx.fragment:fragment-ktx:1.6.0-alpha03")
+    // Accompanist
+    implementation("com.google.accompanist:accompanist-pager:0.25.0") // Pager
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0") // Pager Indicators
 }
