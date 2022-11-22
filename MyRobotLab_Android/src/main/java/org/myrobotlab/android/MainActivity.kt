@@ -1,105 +1,52 @@
 package org.myrobotlab.android
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.pager.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.myrobotlab.Greeting
+import org.myrobotlab.android.models.MrlClientViewModel
+import org.myrobotlab.android.service.TestKotlinService
+import org.myrobotlab.android.views.TabItem
 import org.myrobotlab.kotlin.framework.Logger
 import org.myrobotlab.kotlin.framework.MrlClient
 import org.myrobotlab.kotlin.service.Runtime.initRuntime
-import org.myrobotlab.kotlin.service.Runtime.runtimeID
 import org.myrobotlab.kotlin.utils.Url
 import org.myrobotlab.kotlin.service.Runtime
 
-@Composable
-fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colors = if (darkTheme) {
-        darkColors(
-            primary = Color(0xFFBB86FC),
-            primaryVariant = Color(0xFF3700B3),
-            secondary = Color(0xFF03DAC5)
-        )
-    } else {
-        lightColors(
-            primary = Color(0xFF6200EE),
-            primaryVariant = Color(0xFF3700B3),
-            secondary = Color(0xFF03DAC5)
-        )
-    }
-    val typography = Typography(
-        body1 = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp
-        )
-    )
-    val shapes = Shapes(
-        small = RoundedCornerShape(4.dp),
-        medium = RoundedCornerShape(4.dp),
-        large = RoundedCornerShape(0.dp)
-    )
 
-    MaterialTheme(
-        colors = colors,
-        typography = typography,
-        shapes = shapes,
-        content = content
-    )
-}
 
 class MainActivity : ComponentActivity() {
+    private val clientViewModel: MrlClientViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initRuntime("android")
-        MrlClient.url = Url("10.0.2.2", 8888)
-        MrlClient.logger = object: Logger {
-            override fun info(toLog: String) {
-                Log.e("MrlClient", toLog)
-            }
-
-        }
-        lifecycleScope.launch {
-            Runtime.runInbox(this)
-            MrlClient.connectCoroutine()
-        }
         setContent {
-            MyApplicationTheme {
+            MrlAndroidTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    val scope = rememberCoroutineScope()
-                    var text by remember { mutableStateOf("Loading") }
-                    LaunchedEffect(true) {
-                        scope.launch {
-                            text = try {
-                                //MrlClient.callServiceCoroutine("runtime", "getUptime") ?: "Error"
-                                "help"
-                            } catch (e: Exception) {
-                                e.localizedMessage ?: "error"
-                            }
-                        }
+                    val isConnected by remember{ clientViewModel.connected }
+                    MainScreen(isConnected) { host, port ->
+                        clientViewModel.connect("android", Url(host, port))
                     }
-                    Greeting(text)
                 }
             }
         }
@@ -111,10 +58,126 @@ fun Greeting(text: String) {
     Text(text = text)
 }
 
-@Preview
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun DefaultPreview() {
-    MyApplicationTheme {
-        Greeting("Hello, Android!")
+fun MainScreen(isConnected: Boolean, onConnect: (host: String, port:Int) -> Unit) {
+    MrlAndroidTheme {
+
+        val clientScreen = TabItem.Client(isConnected, onConnect)
+        val tabs = listOf(clientScreen, TabItem.WebGui, TabItem.Donate)
+        val pagerState = rememberPagerState()
+        Scaffold(
+            topBar = { TopBar() },
+        ) { padding ->
+            Column(modifier = Modifier.padding(padding)) {
+                Surface(
+                    elevation = 8.dp
+                ) {
+                    Tabs(tabs = tabs, pagerState = pagerState)
+                }
+                Surface {
+                    TabsContent(tabs = tabs, pagerState = pagerState)
+                }
+            }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+    MainScreen(false) { host, port ->
+        
+    }
+}
+
+@Composable
+fun TopBar() {
+    MrlAndroidTheme {
+        TopAppBar(
+            title = { Text(text = "MyRobotLab Android", fontSize = 18.sp) },
+            backgroundColor = MaterialTheme.colors.secondaryVariant,
+            contentColor = Color.White
+
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TopBarPreview() {
+    TopBar()
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
+    val scope = rememberCoroutineScope()
+    // OR ScrollableTabRow()
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        backgroundColor = MaterialTheme.colors.secondaryVariant,
+        indicator = { tabPositions ->
+            TabRowDefaults.Indicator(
+                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+            )
+        }) {
+        tabs.forEachIndexed { index, tab ->
+            // OR Tab()
+            LeadingIconTab(
+                icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "") },
+                text = { Text(tab.title) },
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Preview(showBackground = true)
+@Composable
+fun TabsPreview() {
+    MrlAndroidTheme {
+        val tabs = listOf(
+            TabItem.Client(false){ host, port ->
+                          
+            },
+            TabItem.WebGui,
+            TabItem.Donate
+        )
+        val pagerState = rememberPagerState()
+        Tabs(tabs = tabs, pagerState = pagerState)
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun TabsContent(tabs: List<TabItem>, pagerState: PagerState) {
+    HorizontalPager(state = pagerState, count = tabs.size) { page ->
+        tabs[page].screen()
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Preview(showBackground = true)
+@Composable
+fun TabsContentPreview() {
+    MrlAndroidTheme {
+        val tabs = listOf(
+            TabItem.Client(false){ host, port ->
+                          
+            },
+            TabItem.WebGui,
+            TabItem.Donate
+        )
+        val pagerState = rememberPagerState()
+        TabsContent(tabs = tabs, pagerState = pagerState)
     }
 }
