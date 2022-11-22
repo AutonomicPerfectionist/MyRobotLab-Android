@@ -79,4 +79,11 @@ object Runtime: Service("runtime") {
             return@coroutineScope null
         }
     }
+
+    override fun addListener(listener: MRLListener) {
+        super.addListener(listener)
+        if (listener.topicMethod == "registered" && listener.callbackName == "runtime") {
+            MrlClient.connected = true
+        }
+    }
 }

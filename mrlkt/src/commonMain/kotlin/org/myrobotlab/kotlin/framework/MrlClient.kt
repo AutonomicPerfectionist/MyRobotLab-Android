@@ -14,6 +14,7 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.myrobotlab.kotlin.service.Runtime
 import org.myrobotlab.kotlin.utils.Url
+import kotlin.properties.Delegates
 
 expect class JsonSerde() {
     inline fun <reified T> deserialize(json: String): T
@@ -26,6 +27,11 @@ interface Logger {
 
 object MrlClient {
     val eventBus = MutableSharedFlow<Message>()
+    var connectedListener: (isConnected: Boolean) -> Unit = {}
+    var connected by Delegates.observable(false) { _, old, new ->
+        connectedListener(new)
+    }
+        internal set
     private var websocketJob: Job? = null
     var url = Url("localhost", 8888)
     var logger: Logger = object : Logger {
