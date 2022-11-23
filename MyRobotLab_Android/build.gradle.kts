@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     kotlin("android")
+    id("com.google.devtools.ksp") version "1.7.20-1.0.7"
 }
 
 android {
@@ -31,6 +32,10 @@ android {
     }
 }
 
+android.sourceSets["main"].java {
+    srcDir("$buildDir/generated/ksp/debug/kotlin")
+}
+
 dependencies {
     implementation(project(":mrlkt"))
     implementation("androidx.compose.ui:ui:1.2.1")
@@ -44,4 +49,8 @@ dependencies {
     // Accompanist
     implementation("com.google.accompanist:accompanist-pager:0.25.0") // Pager
     implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0") // Pager Indicators
+    implementation(project(mapOf("path" to ":mrlkt-annotations")))
+    implementation(project(":mrlkt-ksp"))
+
+    ksp(project(":mrlkt-ksp"))
 }
