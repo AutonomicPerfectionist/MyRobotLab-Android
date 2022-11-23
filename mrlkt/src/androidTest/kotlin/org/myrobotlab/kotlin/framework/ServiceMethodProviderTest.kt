@@ -1,5 +1,6 @@
 package org.myrobotlab.kotlin.framework
 
+import kotlinx.coroutines.runBlocking
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.callMethod
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,22 +22,28 @@ class ServiceMethodProviderTest {
     @Test
     internal fun testExecuteMethodNoParams() {
         val t = TestService()
-        val r = t.callMethod<String>("testMethod", listOf())
-        assertEquals("test", r)
+        runBlocking {
+            val r = t.callMethod<String>("testMethod", listOf())
+            assertEquals("test", r)
+        }
     }
 
     @Test
     internal fun testExecuteMethodOneParam() {
         val t = TestService()
-        val r = t.callMethod<String>("testMethodWithParams", listOf("test1"))
-        assertEquals("test: test1", r)
+        runBlocking {
+            val r = t.callMethod<String>("testMethodWithParams", listOf("test1"))
+            assertEquals("test: test1", r)
+        }
     }
 
     @Test
     internal fun testExecuteMethodOneParamWithNull() {
         val t = TestService()
-        assertFailsWith(RuntimeException::class) {
-            t.callMethod<String>("testMethodWithParams", listOf(null))
+        runBlocking {
+            assertFailsWith(RuntimeException::class) {
+                t.callMethod<String>("testMethodWithParams", listOf(null))
+            }
         }
     }
 }
