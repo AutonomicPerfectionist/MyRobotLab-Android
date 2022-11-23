@@ -41,16 +41,21 @@ class MrlClassMappingProcessor(private val environment: SymbolProcessorEnvironme
             append("val classMappings: BiMap<String, String> = HashBiMap.create(mapOf(")
             append("${classMappings.map { "\"${it.first}\" to \"${it.second.value}\"" }.joinToString ( ", " )}))")
         }
-        val file = environment.codeGenerator.createNewFile(
-            Dependencies(
-                false,
-                *sourceFiles.toList().toTypedArray(),
-            ),
-            "org.myrobotlab.kotlin.framework",
-            "mappings"
-        )
+        try {
+            val file = environment.codeGenerator.createNewFile(
+                Dependencies(
+                    false,
+                    *sourceFiles.toList().toTypedArray(),
+                ),
+                "org.myrobotlab.kotlin.framework",
+                "mappings"
+            )
+            file.write(fileText.toByteArray())
 
-        file.write(fileText.toByteArray())
-        return (annotatedClasses).filterNot { it.validate() }.toList()
+        } catch (_: FileAlreadyExistsException) {
+
+        }
+        return annotatedClasses.filterNot { it.validate() }.toList()
+
     }
 }
