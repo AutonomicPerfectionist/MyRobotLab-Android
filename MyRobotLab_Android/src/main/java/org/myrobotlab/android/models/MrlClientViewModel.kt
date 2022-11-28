@@ -11,9 +11,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.myrobotlab.kotlin.framework.Logger
 import org.myrobotlab.kotlin.framework.MrlClient
+import org.myrobotlab.kotlin.framework.ServiceInterface
 import org.myrobotlab.kotlin.service.Runtime
 import org.myrobotlab.kotlin.utils.Url
 import kotlin.properties.Delegates
+import kotlin.reflect.KClass
 
 class MrlClientViewModel: ViewModel() {
     private val _url = MutableStateFlow<Url?>(null)
@@ -42,6 +44,12 @@ class MrlClientViewModel: ViewModel() {
         viewModelScope.launch {
             Runtime.runInbox(this)
             MrlClient.connectCoroutine(this)
+        }
+    }
+
+    fun startService(name: String, type: KClass<out ServiceInterface>) {
+        viewModelScope.launch {
+            Runtime.start(name, type)
         }
     }
 }
