@@ -108,6 +108,15 @@ interface ServiceInterface {
     fun addListener(listener: MRLListener)
 
     /**
+     * Removes a listener that was previously registered.
+     *
+     * @param outMethod The publishing method
+     * @param serviceName The name of the listening service
+     * @param inMethod The callback method
+     */
+    fun removeListener(outMethod: String, serviceName: String, inMethod: String)
+
+    /**
      * Invoke a method of this service using a message. The message must
      * have the same destination name as the name of this service.
      * All subscribed listeners will be notified with the results
@@ -185,6 +194,10 @@ abstract class Service(override val name: String) : ServiceInterface {
     override fun addListener(listener: MRLListener) {
         MrlClient.logger.info("Adding listener: $listener")
         mrlListeners.getOrPut(listener.topicMethod) { mutableListOf() }.add(listener)
+    }
+
+    override fun removeListener(outMethod: String, serviceName: String, inMethod: String) {
+        mrlListeners[outMethod]?.removeAll { it.callbackName == serviceName }
     }
 
     override suspend fun <R> invoke(message: Message): R? {
