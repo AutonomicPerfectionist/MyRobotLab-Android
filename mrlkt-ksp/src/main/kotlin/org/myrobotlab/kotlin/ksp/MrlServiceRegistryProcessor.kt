@@ -30,9 +30,10 @@ class MrlServiceRegistryProcessor(private val environment: SymbolProcessorEnviro
         val filePreamble = buildString {
             appendLine("package org.myrobotlab.kotlin.framework.generated.services")
             appendLine("import kotlin.reflect.KClass")
+            appendLine("import org.myrobotlab.kotlin.framework.ServiceInterface")
             imports.forEach { appendLine(it) }
 
-            appendLine("val serviceRegistry = listOf<KClass<*>>(")
+            appendLine("val serviceRegistry = listOf<KClass<out ServiceInterface>>(")
         }
 
         val fileText = buildString {
