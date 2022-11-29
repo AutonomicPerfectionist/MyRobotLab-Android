@@ -28,6 +28,7 @@ kotlin {
     sourceSets {
         val ktorVersion = "2.1.2"
         val jacksonVersion = "2.13.4"
+        val koinVersion= "3.2.2"
 
         val commonMain by getting {
             kotlin.srcDir(file("build/generated/ksp/android/androidRelease/kotlin"))
@@ -37,6 +38,8 @@ kotlin {
                 implementation("io.ktor:ktor-client-websockets:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                // Koin
+                implementation("io.insert-koin:koin-core:$koinVersion")
             }
         }
         val commonTest by getting {
