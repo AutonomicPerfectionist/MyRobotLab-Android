@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 import org.myrobotlab.android.MrlAndroidTheme
 
 @Composable
-fun DonationScreen() {
+fun AboutScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -35,8 +35,8 @@ fun DonationScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun DonationScreenPreview() {
+fun AboutScreenPreview() {
     MrlAndroidTheme {
-        DonationScreen()
+        AboutScreen()
     }
 }
