@@ -89,7 +89,11 @@ class CodecUtils {
                     val dataStr = obj.data[i]
                     if (dataStr is String) {
                         MrlClient.logger.info("Converting data $dataStr")
-                        obj.data[i] = dataStr.fromJson(Any::class)
+                        try {
+                            obj.data[i] = dataStr.fromJson(Any::class)
+                        } catch (e: Exception) {
+                            MrlClient.logger.info("EXCEPTION: $e")
+                        }
                     }
                 }
             }
