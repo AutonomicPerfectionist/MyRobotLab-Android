@@ -3,10 +3,8 @@ package org.myrobotlab.kotlin.service
 import kotlinx.coroutines.coroutineScope
 import org.myrobotlab.kotlin.framework.*
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.constructService
-import org.myrobotlab.kotlin.framework.ServiceMethodProvider.methods
 import org.myrobotlab.kotlin.utils.ImmutableMapWrapper
 import kotlin.reflect.KClass
-import kotlin.reflect.typeOf
 
 object Runtime: Service("runtime") {
     lateinit var runtimeID: String
@@ -68,7 +66,7 @@ object Runtime: Service("runtime") {
         val old = Runtime.registry[name]?.service ?: this.run {
             MrlClient.logger.info("Creating service")
             val service = type.constructService(name)
-            service.start(this)
+            service.startService(this)
             register(Registration(service))
             return@run service
 

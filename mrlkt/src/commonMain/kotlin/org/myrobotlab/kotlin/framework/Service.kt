@@ -1,8 +1,11 @@
 package org.myrobotlab.kotlin.framework
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
 import org.myrobotlab.kotlin.framework.MrlClient.eventBus
 import org.myrobotlab.kotlin.framework.MrlClient.logger
@@ -83,6 +86,12 @@ interface ServiceInterface {
     val typeKey: String
 
     /**
+     * A coroutine scope that this service may use to launch additional
+     * coroutines.
+     */
+    val serviceScope: CoroutineScope
+
+    /**
      * Launch a new coroutine within the provided scope
      * to handle message receiving.
      *
@@ -146,7 +155,7 @@ interface ServiceInterface {
      * @param scope: The scope that the inbox coroutine
      * should run in.
      */
-    suspend fun start(scope: CoroutineScope)
+    suspend fun startService(scope: CoroutineScope)
 
 }
 
@@ -161,7 +170,7 @@ interface ServiceInterface {
  * user when starting the service.
  */
 @MrlClassMapping("org.myrobotlab.framework.Service")
-abstract class Service(override val name: String) : ServiceInterface {
+abstract class Service(override val name: String) : KoinComponent, ServiceInterface {
     private val mrlListeners = mutableMapOf<String, MutableList<MRLListener>>()
     private val serviceMethods = methods.associateBy({ it.methodName }, { it })
 
@@ -172,6 +181,8 @@ abstract class Service(override val name: String) : ServiceInterface {
         get() = Runtime.runtimeID
 
     override val typeKey: String = "kt:${this::class.qualifiedName}"
+
+    override var serviceScope: CoroutineScope = MainScope()
 
     override operator fun get(methodName: String): ServiceMethod =
         serviceMethods[methodName] ?: throw NoSuchElementException()
@@ -218,7 +229,7 @@ abstract class Service(override val name: String) : ServiceInterface {
         return ret
     }
 
-    override suspend fun start(scope: CoroutineScope) {
+    override suspend fun startService(scope: CoroutineScope) {
         runInbox(scope)
     }
 }
