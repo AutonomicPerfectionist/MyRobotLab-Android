@@ -1,6 +1,9 @@
 package org.myrobotlab.android
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -21,15 +24,22 @@ import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import org.myrobotlab.android.models.MrlClientViewModel
 import org.myrobotlab.android.service.TestKotlinService
+import org.myrobotlab.android.views.StartServiceListener
 import org.myrobotlab.android.views.TabItem
 import org.myrobotlab.kotlin.framework.Logger
 import org.myrobotlab.kotlin.framework.MrlClient
+import org.myrobotlab.kotlin.framework.ServiceInterface
 import org.myrobotlab.kotlin.service.Runtime.initRuntime
 import org.myrobotlab.kotlin.utils.Url
 import org.myrobotlab.kotlin.service.Runtime
-
+import org.myrobotlab.kotlin.framework.generated.services.serviceRegistry
+import kotlin.reflect.KClass
 
 
 class MainActivity : ComponentActivity() {
@@ -37,6 +47,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.e("MrlAndroid", "Registry: ${serviceRegistry}")
+
+
+        val appModule = module {
+            factory { ContextContainer(androidContext()) }
+            factory { androidContext().getSystemService(Activity.SENSOR_SERVICE) as SensorManager}
+        }
+
+        startKoin {
+            androidLogger()
+            androidContext(this@MainActivity)
+            modules(appModule)
+        }
         setContent {
             MrlAndroidTheme {
                 Surface(
@@ -44,7 +67,9 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val isConnected by remember{ clientViewModel.connected }
-                    MainScreen(isConnected) { host, port ->
+                    MainScreen(serviceRegistry, { name, service ->
+                                                clientViewModel.startService(name, service)
+                    }, isConnected) { host, port ->
                         clientViewModel.connect("android", Url(host, port))
                     }
                 }
@@ -61,10 +86,13 @@ fun Greeting(text: String) {
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun MainScreen(isConnected: Boolean, onConnect: (host: String, port:Int) -> Unit) {
+fun MainScreen(
+    services: List<KClass<out ServiceInterface>>,
+    onServiceStart: StartServiceListener,
+    isConnected: Boolean, onConnect: (host: String, port:Int) -> Unit) {
     MrlAndroidTheme {
 
-        val clientScreen = TabItem.Client(isConnected, onConnect)
+        val clientScreen = TabItem.Client(services, onServiceStart, isConnected, onConnect)
         val tabs = listOf(clientScreen, TabItem.WebGui, TabItem.Donate)
         val pagerState = rememberPagerState()
         Scaffold(
@@ -88,7 +116,7 @@ fun MainScreen(isConnected: Boolean, onConnect: (host: String, port:Int) -> Unit
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen(false) { host, port ->
+    MainScreen(serviceRegistry, {_: String, _: KClass<out ServiceInterface>->}, false) { host, port ->
         
     }
 }
@@ -146,7 +174,7 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
 fun TabsPreview() {
     MrlAndroidTheme {
         val tabs = listOf(
-            TabItem.Client(false){ host, port ->
+            TabItem.Client(listOf(), {name: String, service: KClass<out ServiceInterface> ->}, false){ host, port ->
                           
             },
             TabItem.WebGui,
@@ -171,7 +199,7 @@ fun TabsContent(tabs: List<TabItem>, pagerState: PagerState) {
 fun TabsContentPreview() {
     MrlAndroidTheme {
         val tabs = listOf(
-            TabItem.Client(false){ host, port ->
+            TabItem.Client(listOf(), {name: String, service: KClass<out ServiceInterface> ->}, false){ host, port ->
                           
             },
             TabItem.WebGui,
