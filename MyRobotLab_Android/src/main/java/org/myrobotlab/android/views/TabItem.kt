@@ -2,8 +2,8 @@ package org.myrobotlab.android.views
 
 import androidx.compose.runtime.Composable
 import org.myrobotlab.android.R
-import org.myrobotlab.kotlin.framework.Service
 import org.myrobotlab.kotlin.framework.ServiceInterface
+import org.myrobotlab.kotlin.utils.Url
 import kotlin.reflect.KClass
 
 typealias ComposableFun = @Composable () -> Unit
@@ -15,6 +15,9 @@ sealed class TabItem(var icon: Int, var title: String, var screen: ComposableFun
         var isConnected: Boolean,
         val onConnect:(host: String, port: Int) -> Unit,
     ) : TabItem(R.drawable.ic_square, "Client", { ClientScreen(services, onStartService, isConnected, onConnect) })
-    object WebGui : TabItem( R.drawable.ic_square,"WebGui", { WebGuiScreen() })
-    object Donate : TabItem( R.drawable.ic_square,"About", { DonationScreen() })
+    class WebGui(
+        val connected: Boolean,
+        val url: Url
+    ) : TabItem( R.drawable.ic_square,"WebGui", { WebGuiScreen(connected, url) })
+    object About : TabItem( R.drawable.ic_square,"About", { AboutScreen() })
 }
