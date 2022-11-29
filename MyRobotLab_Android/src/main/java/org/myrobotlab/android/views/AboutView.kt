@@ -24,7 +24,7 @@ fun DonationScreen() {
             .wrapContentSize(Alignment.Center)
     ) {
         Text(
-            text = "Donations View",
+            text = "About View",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,

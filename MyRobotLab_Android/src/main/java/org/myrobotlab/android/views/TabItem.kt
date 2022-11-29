@@ -16,5 +16,5 @@ sealed class TabItem(var icon: Int, var title: String, var screen: ComposableFun
         val onConnect:(host: String, port: Int) -> Unit,
     ) : TabItem(R.drawable.ic_square, "Client", { ClientScreen(services, onStartService, isConnected, onConnect) })
     object WebGui : TabItem( R.drawable.ic_square,"WebGui", { WebGuiScreen() })
-    object Donate : TabItem( R.drawable.ic_square,"Donate", { DonationScreen() })
+    object Donate : TabItem( R.drawable.ic_square,"About", { DonationScreen() })
 }
