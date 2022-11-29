@@ -37,7 +37,8 @@ data class ServiceMethod(
     val methodName: String,
     val valueParameters: List<KType>,
     val returnType: KType,
-    val callable: KCallable<*>) {
+    val callable: KCallable<*>
+) {
     operator fun invoke(vararg params: Any?) {
         val f = ::invoke
         println(f)
@@ -117,6 +118,11 @@ interface ServiceInterface {
     fun addListener(listener: MRLListener)
 
     /**
+     * Add a listener by inferring the callback topic name.
+     */
+    fun addListener(topicMethod: String, callbackName: String)
+
+    /**
      * Removes a listener that was previously registered.
      *
      * @param outMethod The publishing method
@@ -190,7 +196,8 @@ abstract class Service(override val name: String) : KoinComponent, ServiceInterf
     override suspend fun runInbox(scope: CoroutineScope) {
         scope.launch {
             println("Launched")
-            eventBus.filter { it.name == name || it.name == fullName }.takeWhile { it.method != "shutdown" }
+            eventBus.filter { it.name == name || it.name == fullName }
+                .takeWhile { it.method != "shutdown" }
                 .collect { message ->
 
                     if (message.method in this@Service.methods.map { method -> method.methodName }) {
@@ -205,6 +212,27 @@ abstract class Service(override val name: String) : KoinComponent, ServiceInterf
     override fun addListener(listener: MRLListener) {
         MrlClient.logger.info("Adding listener: $listener")
         mrlListeners.getOrPut(listener.topicMethod) { mutableListOf() }.add(listener)
+    }
+
+    override fun addListener(topicMethod: String, callbackName: String) {
+        val callbackTopic = if (topicMethod.startsWith("publish")) {
+            "on${
+                topicMethod.substring("publish".length)
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            }"
+        } else if (topicMethod.startsWith("get")) {
+            "on${
+                topicMethod.substring("get".length)
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            }"
+        } else {
+
+            // no replacement - just pefix and capitalize
+            // FIXME - subscribe to onMethod --- gets ---> onOnMethod :P
+            "on${topicMethod.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}"
+        }
+
+        addListener(MRLListener(topicMethod, callbackName, callbackTopic))
     }
 
     override fun removeListener(outMethod: String, serviceName: String, inMethod: String) {
