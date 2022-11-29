@@ -37,6 +37,9 @@ android.sourceSets["main"].java {
 }
 
 dependencies {
+    val koinVersion= "3.2.2"
+    val koinAndroidVersion= "3.3.0"
+    val koinAndroidComposeVersion= "3.3.0"
     implementation(project(":mrlkt"))
     implementation("androidx.compose.ui:ui:1.2.1")
     implementation("androidx.compose.ui:ui-tooling:1.2.1")
@@ -50,6 +53,17 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.25.0") // Pager
     implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0") // Pager Indicators
     implementation(project(mapOf("path" to ":mrlkt-annotations")))
+
+    // Koin
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    // Koin main features for Android
+    implementation("io.insert-koin:koin-android:$koinAndroidVersion")
+    // Java Compatibility
+    implementation("io.insert-koin:koin-android-compat:$koinAndroidVersion")
+    // Jetpack Compose
+    implementation("io.insert-koin:koin-androidx-compose:$koinAndroidComposeVersion")
+
+
     implementation(project(":mrlkt-ksp"))
 
     ksp(project(":mrlkt-ksp"))
