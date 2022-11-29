@@ -21,6 +21,8 @@ class MrlServiceRegistryProcessor(private val environment: SymbolProcessorEnviro
         val annotatedClasses: Sequence<KSClassDeclaration> =
             resolver.findAnnotations(MrlService::class)
         if(!annotatedClasses.iterator().hasNext()) return emptyList()
+
+
         val sourceFiles = annotatedClasses.mapNotNull { it.containingFile }
         val imports = annotatedClasses.mapNotNull {
             if (it.qualifiedName != null)
@@ -44,7 +46,7 @@ class MrlServiceRegistryProcessor(private val environment: SymbolProcessorEnviro
         try {
             val file = environment.codeGenerator.createNewFile(
                 Dependencies(
-                    false,
+                    true,
                     *sourceFiles.toList().toTypedArray(),
                 ),
                 "org.myrobotlab.kotlin.framework.generated.services",

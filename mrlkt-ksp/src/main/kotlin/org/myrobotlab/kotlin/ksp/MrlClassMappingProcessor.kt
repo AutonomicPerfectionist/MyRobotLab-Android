@@ -44,7 +44,7 @@ class MrlClassMappingProcessor(private val environment: SymbolProcessorEnvironme
         try {
             val file = environment.codeGenerator.createNewFile(
                 Dependencies(
-                    false,
+                    true,
                     *sourceFiles.toList().toTypedArray(),
                 ),
                 "org.myrobotlab.kotlin.framework",
