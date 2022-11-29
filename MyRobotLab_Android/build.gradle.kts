@@ -52,6 +52,7 @@ dependencies {
     // Accompanist
     implementation("com.google.accompanist:accompanist-pager:0.25.0") // Pager
     implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0") // Pager Indicators
+    implementation("com.google.accompanist:accompanist-webview:0.25.0")
     implementation(project(mapOf("path" to ":mrlkt-annotations")))
 
     // Koin
