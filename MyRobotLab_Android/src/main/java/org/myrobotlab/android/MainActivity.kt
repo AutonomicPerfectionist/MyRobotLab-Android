@@ -23,7 +23,9 @@ import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.myrobotlab.android.models.MrlClientViewModel
 import org.myrobotlab.android.views.StartServiceListener
@@ -46,6 +48,9 @@ class MainActivity : ComponentActivity() {
             factory { ContextContainer(androidContext()) }
             factory { androidContext().getSystemService(Activity.SENSOR_SERVICE) as SensorManager}
         }
+
+        if (GlobalContext.getOrNull() != null)
+            stopKoin()
 
         startKoin {
             androidLogger()
