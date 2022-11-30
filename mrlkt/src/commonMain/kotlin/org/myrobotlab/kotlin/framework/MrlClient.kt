@@ -99,7 +99,7 @@ object MrlClient {
                     inputRoutine.join()
                     outputRoutine.cancelAndJoin()
                 } catch (e: ClosedReceiveChannelException) {
-                    logger.info("Session closed")
+                    logger.info("Session closed: $e")
                 }
             }
         }
