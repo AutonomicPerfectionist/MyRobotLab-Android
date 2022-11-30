@@ -87,6 +87,15 @@ interface ServiceInterface {
     val typeKey: String
 
     /**
+     * The type key of this service. A type
+     * key identifies the language and class of
+     * an object across process boundaries.
+     * For kotlin, this type key is equal to
+     * `"kt:${this::class.qualifiedName}"`.
+     */
+    val type: String
+
+    /**
      * A coroutine scope that this service may use to launch additional
      * coroutines.
      */
@@ -188,6 +197,8 @@ abstract class Service(override val name: String) : KoinComponent, ServiceInterf
 
     override val typeKey: String = "kt:${this::class.qualifiedName}"
 
+    override val type: String by ::typeKey
+
     override var serviceScope: CoroutineScope = MainScope()
 
     override operator fun get(methodName: String): ServiceMethod =
@@ -236,7 +247,8 @@ abstract class Service(override val name: String) : KoinComponent, ServiceInterf
     }
 
     override fun removeListener(outMethod: String, serviceName: String, inMethod: String) {
-        mrlListeners[outMethod]?.removeAll { it.callbackName == serviceName }
+        mrlListeners[outMethod]?.indexOfFirst { it.callbackName == serviceName }
+            ?.let { mrlListeners[outMethod]?.removeAt(it) }
     }
 
     override suspend fun <R> invoke(message: Message): R? {
