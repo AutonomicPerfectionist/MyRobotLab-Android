@@ -40,7 +40,8 @@ typealias StartServiceListener = (name: String, klass: KClass<out ServiceInterfa
 @Composable
 fun ClientScreen(
     services: List<KClass<out ServiceInterface>>, onStartService: StartServiceListener,
-    isConnected: Boolean, onConnect: (host: String, port: Int) -> Unit
+    isConnected: Boolean, onConnect: (host: String, port: Int) -> Unit,
+    onDisconnect: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -61,7 +62,7 @@ fun ClientScreen(
         when (currentWindow) {
             ClientWindowDialog.OVERVIEW -> OverviewDialog(isConnected, {
                 currentWindow = ClientWindowDialog.CONNECTION
-            }, { showStartService = true })
+            }, onDisconnect, { showStartService = true })
             ClientWindowDialog.CONNECTION -> ConnectDialog { host, port ->
                 currentWindow = ClientWindowDialog.OVERVIEW
                 onConnect(host, port)
@@ -82,6 +83,7 @@ fun ClientScreen(
 fun OverviewDialog(
     isConnected: Boolean,
     onConnectClick: () -> Unit,
+    onDisconnectClick: () -> Unit,
     onStartServiceClick: () -> Unit
 ) {
     Column(
@@ -93,7 +95,7 @@ fun OverviewDialog(
     ) {
         Spacer(modifier = Modifier.height(25.dp))
         Button(
-            onClick = onConnectClick,
+            onClick = if(!isConnected) onConnectClick else onDisconnectClick,
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant)
         ) {
             Text(text = if (!isConnected) "Connect" else "Disconnect")
@@ -264,9 +266,9 @@ fun StartServiceDialogPreview() {
 @Composable
 fun ClientScreenPreview() {
     MrlAndroidTheme {
-        ClientScreen(listOf(), { _, _ -> }, false) { host, port ->
+        ClientScreen(listOf(), { _, _ -> }, false, { host, port ->
 
-        }
+        }){}
     }
 }
 
@@ -274,7 +276,7 @@ fun ClientScreenPreview() {
 @Composable
 fun OverviewWindowPreview() {
     MrlAndroidTheme {
-        OverviewDialog(false, {}) {
+        OverviewDialog(false, {}, {}) {
 
         }
     }
