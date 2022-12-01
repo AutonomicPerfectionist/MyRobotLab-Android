@@ -10,8 +10,6 @@ object Runtime: Service("runtime") {
     lateinit var runtimeID: String
     private set
 
-    private var hasInit = false
-
     private val mutableRegistry = mutableMapOf<String, Registration>()
 
     /**
@@ -21,8 +19,7 @@ object Runtime: Service("runtime") {
     val registry: Map<String, Registration> = ImmutableMapWrapper(mutableRegistry)
 
     fun initRuntime(id: String) {
-        require(!hasInit) {"Runtime may only be initialized once"}
-        hasInit = true
+        require(!MrlClient.connected) {"Runtime may only be initialized while disconnected"}
         runtimeID = id
         mutableRegistry["runtime"] = Registration(runtimeID, "runtime", "org.myrobotlab.service.Runtime")
     }
