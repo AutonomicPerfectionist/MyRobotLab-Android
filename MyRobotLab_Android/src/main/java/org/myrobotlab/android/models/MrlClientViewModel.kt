@@ -44,6 +44,10 @@ class MrlClientViewModel: ViewModel() {
         }
     }
 
+    fun disconnect() {
+        MrlClient.disconnect()
+    }
+
     fun startService(name: String, type: KClass<out ServiceInterface>) {
         viewModelScope.launch {
             Runtime.start(name, type)
