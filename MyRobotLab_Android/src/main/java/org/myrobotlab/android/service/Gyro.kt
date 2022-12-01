@@ -25,7 +25,6 @@ class Gyro(name: String): Service(name), OrientationPublisher, SensorEventListen
 
 
     override fun publishOrientation(data: Orientation): Orientation {
-        Log.e("Gyro", "Orientation: $data")
         return data
     }
 
@@ -38,14 +37,13 @@ class Gyro(name: String): Service(name), OrientationPublisher, SensorEventListen
     }
 
     override fun start() {
-        Log.e("Gyro", contextContainer.toString())
         gyro = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         sensorManager.registerListener(this, gyro, sensorPollRate)
 
     }
 
     override fun stop() {
-        TODO("Not yet implemented")
+        sensorManager.unregisterListener(this)
     }
 
     override fun startOrientationTracking() {
@@ -58,7 +56,6 @@ class Gyro(name: String): Service(name), OrientationPublisher, SensorEventListen
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor == gyro) {
-            Log.d("Gyro", "Sensor changed")
             val rotationMatrix = FloatArray(9)
             SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
             val worldAxisX = SensorManager.AXIS_X
