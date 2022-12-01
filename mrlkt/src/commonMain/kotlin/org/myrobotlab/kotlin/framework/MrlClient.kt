@@ -54,6 +54,10 @@ object MrlClient {
         connectCoroutine(this)
     }
 
+    fun disconnect() {
+        websocketJob?.cancel()
+    }
+
     inline fun <reified R> callService(name: String, method: String, vararg data: Any?): R? =
         runBlocking {
             callServiceCoroutine(name, method, data)
@@ -100,6 +104,9 @@ object MrlClient {
                     outputRoutine.cancelAndJoin()
                 } catch (e: ClosedReceiveChannelException) {
                     logger.info("Session closed: $e")
+                } catch (ce: CancellationException) {
+                    connected = false
+                    throw ce
                 }
             }
         }
