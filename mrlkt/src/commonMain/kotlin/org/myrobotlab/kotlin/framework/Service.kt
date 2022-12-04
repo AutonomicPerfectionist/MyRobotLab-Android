@@ -13,6 +13,7 @@ import org.myrobotlab.kotlin.framework.MrlClient.sendCommand
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.callMethod
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.methods
 import org.myrobotlab.kotlin.service.Runtime
+import kotlin.jvm.Transient
 import kotlin.reflect.KCallable
 
 import kotlin.reflect.KFunction1
@@ -94,6 +95,12 @@ interface ServiceInterface {
      * `"kt:${this::class.qualifiedName}"`.
      */
     val type: String
+
+    /**
+     * Equivalent to type,
+     * duplicated due to legacy reasons.
+     */
+    val serviceClass: String
 
     /**
      * A coroutine scope that this service may use to launch additional
@@ -187,6 +194,8 @@ interface ServiceInterface {
 @MrlClassMapping("org.myrobotlab.framework.Service")
 abstract class Service(override val name: String) : KoinComponent, ServiceInterface {
     private val mrlListeners = mutableMapOf<String, MutableList<MRLListener>>()
+
+    @Transient
     private val serviceMethods = methods.associateBy({ it.methodName }, { it })
 
     override val fullName: String
@@ -199,6 +208,9 @@ abstract class Service(override val name: String) : KoinComponent, ServiceInterf
 
     override val type: String by ::typeKey
 
+    override val serviceClass: String by ::type
+
+    @Transient
     override var serviceScope: CoroutineScope = MainScope()
 
     override operator fun get(methodName: String): ServiceMethod =
