@@ -9,7 +9,7 @@ android {
     compileSdk = 33
     defaultConfig {
         applicationId = "org.myrobotlab.android"
-        minSdk = 24
+        minSdk = 23
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -64,6 +64,9 @@ dependencies {
     // Jetpack Compose
     implementation("io.insert-koin:koin-androidx-compose:$koinAndroidComposeVersion")
 
+    val ktorVersion = "2.1.2"
+
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
 
     implementation(project(":mrlkt-ksp"))
 

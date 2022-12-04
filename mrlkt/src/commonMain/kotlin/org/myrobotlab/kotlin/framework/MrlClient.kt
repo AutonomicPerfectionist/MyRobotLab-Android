@@ -40,7 +40,7 @@ object MrlClient {
         }
     }
     val serde: JsonSerde = JsonSerde()
-    private val client = HttpClient(CIO) {
+    var client = HttpClient(CIO) {
         install(WebSockets) {
             pingInterval = -1L
         }
