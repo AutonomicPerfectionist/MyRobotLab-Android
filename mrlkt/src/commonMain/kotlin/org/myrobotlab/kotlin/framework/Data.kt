@@ -2,6 +2,7 @@ package org.myrobotlab.kotlin.framework
 
 import io.ktor.util.date.*
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
+import org.myrobotlab.kotlin.codec.JsonDelegate
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.mrlInterfaceNames
 import org.myrobotlab.kotlin.service.Runtime.runtimeID
 import kotlin.jvm.Transient
@@ -30,8 +31,18 @@ data class Registration (
     @Transient
     val service: ServiceInterface? = null
 ) {
+    @Transient
+    private val delegate = JsonDelegate(::service)
+
+
     constructor(service: ServiceInterface): this(
-        runtimeID, service.name, service.typeKey, service = service, interfaces = service.mrlInterfaceNames)
+        runtimeID,
+        service.name,
+        service.typeKey,
+        service = service,
+        interfaces = service.mrlInterfaceNames,
+        state = "{\"name\": \"${service.name}\", \"id\": \"${service.id}\", \"serviceClass\": ${service.serviceClass}}"
+    )
 
 }
 
