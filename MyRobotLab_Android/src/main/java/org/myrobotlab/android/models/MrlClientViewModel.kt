@@ -4,6 +4,9 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.websocket.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -29,6 +32,12 @@ class MrlClientViewModel: ViewModel() {
 
         MrlClient.connectedListener = {
             connected.value = it
+        }
+
+        MrlClient.client = HttpClient(OkHttp) {
+            install(WebSockets) {
+                pingInterval = -1L
+            }
         }
     }
 

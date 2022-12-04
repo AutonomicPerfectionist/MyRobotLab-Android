@@ -31,7 +31,7 @@ kotlin {
         val koinVersion= "3.2.2"
 
         val commonMain by getting {
-            kotlin.srcDir(file("build/generated/ksp/android/androidRelease/kotlin"))
+//            kotlin.srcDir(file("build/generated/ksp/android/androidRelease/kotlin"))
             dependencies {
                 implementation(project(":mrlkt-annotations"))
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -93,7 +93,7 @@ android {
     namespace = "org.myrobotlab"
     compileSdk = 33
     defaultConfig {
-        minSdk = 24
+        minSdk = 23
         targetSdk = 33
     }
 }
