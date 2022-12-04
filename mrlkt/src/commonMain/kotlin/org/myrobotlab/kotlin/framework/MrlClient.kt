@@ -94,7 +94,13 @@ object MrlClient {
 
                     val outputRoutine = launch {
                         for (message in sendChannel) {
-                            val messageStr = serde.serialize(message)
+                            logger.info("Got message to send: $message")
+                            val messageStr = try {
+                                serde.serialize(message)
+                            } catch (e: Exception) {
+                                logger.info("Got exception while serializing message: $e")
+                                throw e
+                            }
                             logger.info("Sending message: $messageStr")
                             send(messageStr)
                         }
