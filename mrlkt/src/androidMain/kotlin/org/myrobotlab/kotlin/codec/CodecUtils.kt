@@ -3,7 +3,9 @@ package org.myrobotlab.kotlin.codec
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -42,7 +44,9 @@ class CodecUtils {
          *
          * @see .USING_GSON
          */
-        val mapper = ObjectMapper()
+        val mapper: JsonMapper = JsonMapper.builder()
+            .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
+            .build()
 
         /**
          * The [TypeFactory] used to generate type information for
@@ -58,28 +62,31 @@ class CodecUtils {
 
         init {
 
-            mapper.registerModule(KotlinModule())
+            mapper.registerModule(KotlinModule.Builder().build())
 
             //Actually add our polymorphic support
             mapper.registerModule(JacksonPolymorphicModule.polymorphicModule)
 
             //Disables Jackson's automatic property detection
             mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-            mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.ANY)
+            mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.PROTECTED_AND_PUBLIC)
+            mapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.PROTECTED_AND_PUBLIC)
+            mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PROTECTED_AND_PUBLIC)
 
             //Make jackson behave like gson in that unknown properties are ignored
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
 
         fun <T> T.toJson(): String {
-            if (this is Message) {
+            return if (this is Message) {
                 val newMsg = this.copy()
                 for (index in newMsg.data.indices) {
                     newMsg.data[index] = mapper.writeValueAsString(newMsg.data[index])
                 }
+                mapper.writeValueAsString(newMsg)
+            } else {
+                mapper.writeValueAsString(this)
             }
-            return mapper.writeValueAsString(this)
         }
         fun <T : Any> String.fromJson(type: KClass<T>): T = mapper.readValue(this, type.java)
         inline fun <reified T> String.fromJson(): T {
