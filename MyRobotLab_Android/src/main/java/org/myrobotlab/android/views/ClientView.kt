@@ -162,7 +162,7 @@ fun ConnectDialog(onConnectClick: (host: String, port: Int, id: String) -> Unit)
             onValueChange = { id = it },
             placeholder = {Text("android")}
         )
-        Text("Client ID: " + id.text)
+        Text("Client ID")
 
 
         Spacer(modifier = Modifier.height(25.dp))
