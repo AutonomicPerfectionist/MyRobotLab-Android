@@ -106,10 +106,19 @@ class JacksonPolymorphicSerializer : BeanSerializerBase {
         jsonGenerator: JsonGenerator,
         serializerProvider: SerializerProvider
     ) {
-        jsonGenerator.writeStartObject()
-        serializeFields(o, jsonGenerator, serializerProvider)
-        val typeKey = o::class.findAnnotation<MrlClassMapping>()?.javaClass ?: "kt:${o::class.qualifiedName}"
-        jsonGenerator.writeStringField(CLASS_META_KEY, typeKey)
-        jsonGenerator.writeEndObject()
+
+        // Java doesn't have Unit, it does have Void but
+        // can't make an instance of that, and invoke() should
+        // return null for void methods
+        if (o is Unit) {
+            jsonGenerator.writeObject(null)
+        } else {
+            jsonGenerator.writeStartObject()
+            serializeFields(o, jsonGenerator, serializerProvider)
+            val typeKey = o::class.findAnnotation<MrlClassMapping>()?.javaClass
+                ?: "kt:${o::class.qualifiedName}"
+            jsonGenerator.writeStringField(CLASS_META_KEY, typeKey)
+            jsonGenerator.writeEndObject()
+        }
     }
 }
