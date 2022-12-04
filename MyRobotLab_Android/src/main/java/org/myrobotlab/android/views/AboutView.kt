@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -75,7 +76,8 @@ fun AboutScreen() {
                     .firstOrNull()?.let { stringAnnotation ->
                         uriHandler.openUri(stringAnnotation.item)
                     }
-            }
+            },
+            style = TextStyle(color = MaterialTheme.colors.onBackground)
         )
 
         Text("License: Apache 2.0")
