@@ -93,7 +93,7 @@ android {
     namespace = "org.myrobotlab"
     compileSdk = 33
     defaultConfig {
-        minSdk = 23
+        minSdk = 22
         targetSdk = 33
     }
 }

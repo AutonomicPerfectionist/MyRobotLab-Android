@@ -9,7 +9,7 @@ android {
     compileSdk = 33
     defaultConfig {
         applicationId = "org.myrobotlab.android"
-        minSdk = 23
+        minSdk = 22
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -40,7 +40,9 @@ dependencies {
     val koinVersion= "3.2.2"
     val koinAndroidVersion= "3.3.0"
     val koinAndroidComposeVersion= "3.3.0"
+    val jacksonVersion = "2.13.4"
     implementation(project(":mrlkt"))
+    implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     implementation("androidx.compose.ui:ui:1.2.1")
     implementation("androidx.compose.ui:ui-tooling:1.2.1")
     implementation("androidx.compose.ui:ui-tooling-preview:1.2.1")
