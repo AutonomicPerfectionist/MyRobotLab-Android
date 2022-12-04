@@ -67,9 +67,9 @@ class MainActivity : ComponentActivity() {
                     var url by remember { mutableStateOf(clientViewModel.url.value ?: Url("localhost", 8888)) }
                     MainScreen(url, serviceRegistry, { name, service ->
                                                 clientViewModel.startService(name, service)
-                    }, isConnected, { host, port ->
+                    }, isConnected, { host, port, id ->
                         url = Url(host, port)
-                        clientViewModel.connect("android", url)
+                        clientViewModel.connect(id, url)
                     }) {
                         clientViewModel.disconnect()
                     }
@@ -91,7 +91,9 @@ fun MainScreen(
     url: Url,
     services: List<KClass<out ServiceInterface>>,
     onServiceStart: StartServiceListener,
-    isConnected: Boolean, onConnect: (host: String, port:Int) -> Unit, onDisconnect: () -> Unit) {
+    isConnected: Boolean,
+    onConnect: (host: String, port:Int, id: String) -> Unit,
+    onDisconnect: () -> Unit) {
     MrlAndroidTheme {
 
         val clientScreen = TabItem.Client(services, onServiceStart, isConnected, onConnect, onDisconnect)
@@ -118,7 +120,7 @@ fun MainScreen(
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen(Url("localhost", 8888), serviceRegistry, {_: String, _: KClass<out ServiceInterface>->}, false, { host, port ->
+    MainScreen(Url("localhost", 8888), serviceRegistry, {_: String, _: KClass<out ServiceInterface>->}, false, { _, _, _ ->
         
     }) {}
 }
@@ -176,7 +178,7 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
 fun TabsPreview() {
     MrlAndroidTheme {
         val tabs = listOf(
-            TabItem.Client(listOf(), {name: String, service: KClass<out ServiceInterface> ->}, false, { host, port ->
+            TabItem.Client(listOf(), {name: String, service: KClass<out ServiceInterface> ->}, false, { _, _, _ ->
                           
             }){},
             TabItem.WebGui(false, Url("localhost", 8888)),
@@ -201,7 +203,7 @@ fun TabsContent(tabs: List<TabItem>, pagerState: PagerState) {
 fun TabsContentPreview() {
     MrlAndroidTheme {
         val tabs = listOf(
-            TabItem.Client(listOf(), {name: String, service: KClass<out ServiceInterface> ->}, false, { host, port ->
+            TabItem.Client(listOf(), {name: String, service: KClass<out ServiceInterface> ->}, false, { _, _, _ ->
                           
             }){},
             TabItem.WebGui(false, Url("localhost", 8888)),

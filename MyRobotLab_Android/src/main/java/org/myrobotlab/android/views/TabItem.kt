@@ -13,7 +13,7 @@ sealed class TabItem(var icon: Int, var title: String, var screen: ComposableFun
         val services: List<KClass<out ServiceInterface>>,
         val onStartService: StartServiceListener,
         var isConnected: Boolean,
-        val onConnect:(host: String, port: Int) -> Unit,
+        val onConnect:(host: String, port: Int, id: String) -> Unit,
         val onDisconnect: () -> Unit
     ) : TabItem(R.drawable.ic_square, "Client", { ClientScreen(services, onStartService, isConnected, onConnect, onDisconnect) })
     class WebGui(

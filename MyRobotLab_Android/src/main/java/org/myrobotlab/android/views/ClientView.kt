@@ -19,16 +19,19 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import org.myrobotlab.android.MrlAndroidTheme
 import org.myrobotlab.android.service.TestKotlinService
 import org.myrobotlab.kotlin.framework.Service
 import org.myrobotlab.kotlin.framework.ServiceInterface
+import org.myrobotlab.kotlin.service.Runtime.registry
 import kotlin.reflect.KClass
 
 enum class ClientWindowDialog {
@@ -40,7 +43,7 @@ typealias StartServiceListener = (name: String, klass: KClass<out ServiceInterfa
 @Composable
 fun ClientScreen(
     services: List<KClass<out ServiceInterface>>, onStartService: StartServiceListener,
-    isConnected: Boolean, onConnect: (host: String, port: Int) -> Unit,
+    isConnected: Boolean, onConnect: (host: String, port: Int, id: String) -> Unit,
     onDisconnect: () -> Unit
 ) {
     Column(
@@ -63,14 +66,14 @@ fun ClientScreen(
             ClientWindowDialog.OVERVIEW -> OverviewDialog(isConnected, {
                 currentWindow = ClientWindowDialog.CONNECTION
             }, onDisconnect, { showStartService = true })
-            ClientWindowDialog.CONNECTION -> ConnectDialog { host, port ->
+            ClientWindowDialog.CONNECTION -> ConnectDialog { host, port, id ->
                 currentWindow = ClientWindowDialog.OVERVIEW
-                onConnect(host, port)
+                onConnect(host, port, id)
             }
         }
 
         if (showStartService) {
-            StartServiceDialog({showStartService = false}, services) { name, service ->
+            StartServiceDialog({ showStartService = false }, services) { name, service ->
                 showStartService = false
                 onStartService(name, service)
             }
@@ -95,7 +98,7 @@ fun OverviewDialog(
     ) {
         Spacer(modifier = Modifier.height(25.dp))
         Button(
-            onClick = if(!isConnected) onConnectClick else onDisconnectClick,
+            onClick = if (!isConnected) onConnectClick else onDisconnectClick,
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant)
         ) {
             Text(text = if (!isConnected) "Connect" else "Disconnect")
@@ -107,12 +110,22 @@ fun OverviewDialog(
         ) {
             Text(text = "Start Service")
         }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text("Services:", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        LazyColumn {
+            registry.values.forEach {
+                item {
+                    Text(it.name)
+                }
+            }
+        }
+
 
     }
 }
 
 @Composable
-fun ConnectDialog(onConnectClick: (host: String, port: Int) -> Unit) {
+fun ConnectDialog(onConnectClick: (host: String, port: Int, id: String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -123,6 +136,7 @@ fun ConnectDialog(onConnectClick: (host: String, port: Int) -> Unit) {
         var port by remember {
             mutableStateOf(TextFieldValue())
         }
+        var id by remember { mutableStateOf(TextFieldValue()) }
 
         Spacer(modifier = Modifier.height(25.dp))
 
@@ -141,11 +155,20 @@ fun ConnectDialog(onConnectClick: (host: String, port: Int) -> Unit) {
         )
         Text("MRL Port: " + port.text)
 
+        Spacer(modifier = Modifier.height(25.dp))
+
+        TextField(
+            value = id,
+            onValueChange = { id = it },
+            placeholder = {Text("android")}
+        )
+        Text("Client ID: " + id.text)
+
 
         Spacer(modifier = Modifier.height(25.dp))
         Button(
             onClick = {
-                onConnectClick(host.text, port.text.toInt())
+                onConnectClick(host.text, port.text.toInt(), if(id.text == "") "android" else id.text)
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant)
         ) {
@@ -185,16 +208,18 @@ fun StartServiceDialog(
                 }
 
                 var name by remember {
-                    mutableStateOf("unknown-service")
+                    mutableStateOf("")
                 }
-                
+
                 Spacer(modifier = Modifier.height(25.dp))
 
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.TopStart)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.TopStart)
+                ) {
 
-                    var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
+                    var mTextFieldSize by remember { mutableStateOf(Size.Zero) }
                     // Up Icon when expanded and down icon when collapsed
                     val icon = if (menuExpanded)
                         Icons.Filled.KeyboardArrowUp
@@ -202,7 +227,11 @@ fun StartServiceDialog(
                         Icons.Filled.KeyboardArrowDown
 
                     // Create a string value to store the selected city
-                    var mSelectedText by remember { mutableStateOf("Unknown Service") }
+                    var mSelectedText by remember {
+                        mutableStateOf(
+                            services[selectedIndex].simpleName ?: "Unknown Service"
+                        )
+                    }
 
                     // Create an Outlined Text Field
                     // with icon and not expanded
@@ -215,10 +244,11 @@ fun StartServiceDialog(
                                 // This value is used to assign to
                                 // the DropDown the same width
                                 mTextFieldSize = coordinates.size.toSize()
-                            }.clickable{menuExpanded = !menuExpanded},
-                        label = {Text("Service")},
+                            }
+                            .clickable { menuExpanded = !menuExpanded },
+                        label = { Text("Service") },
                         trailingIcon = {
-                            Icon(icon,"contentDescription")
+                            Icon(icon, "contentDescription")
                         },
                         enabled = false
                     )
@@ -226,7 +256,7 @@ fun StartServiceDialog(
                     DropdownMenu(
                         expanded = menuExpanded,
                         modifier = Modifier
-                            .width(with(LocalDensity.current){mTextFieldSize.width.toDp()}),
+                            .width(with(LocalDensity.current) { mTextFieldSize.width.toDp() }),
                         onDismissRequest = { menuExpanded = false }) {
                         services.forEachIndexed { index, service ->
                             DropdownMenuItem(onClick = {
@@ -240,10 +270,12 @@ fun StartServiceDialog(
                     }
                 }
 
-                TextField(value = name, onValueChange = {name = it})
+                TextField(value = name, onValueChange = { name = it }, placeholder = {
+                    Text("unknown-service")
+                })
 
                 Button(
-                    onClick = { onStartService(name, services[selectedIndex]) },
+                    onClick = { onStartService(if (name == "") "unknown-service" else name, services[selectedIndex]) },
                     colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant)
                 ) {
                     Text(text = "Start Service")
@@ -258,7 +290,7 @@ fun StartServiceDialog(
 @Composable
 fun StartServiceDialogPreview() {
     MrlAndroidTheme {
-        StartServiceDialog({}, listOf(TestKotlinService::class)) {_, _ ->}
+        StartServiceDialog({}, listOf(TestKotlinService::class)) { _, _ -> }
     }
 }
 
@@ -266,9 +298,9 @@ fun StartServiceDialogPreview() {
 @Composable
 fun ClientScreenPreview() {
     MrlAndroidTheme {
-        ClientScreen(listOf(), { _, _ -> }, false, { host, port ->
+        ClientScreen(listOf(), { _, _ -> }, false, { host, port, id ->
 
-        }){}
+        }) {}
     }
 }
 
@@ -287,7 +319,7 @@ fun OverviewWindowPreview() {
 @Composable
 fun ConnectWindowPreview() {
     MrlAndroidTheme {
-        ConnectDialog { host, port ->
+        ConnectDialog { host, port, id ->
 
         }
     }
