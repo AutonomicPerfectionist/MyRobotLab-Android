@@ -72,7 +72,7 @@ class Gyro(name: String): Service(name), OrientationPublisher, SensorEventListen
             val pitch: Float = orientationArray[1] * FROM_RADS_TO_DEGS
             val roll: Float = orientationArray[2] * FROM_RADS_TO_DEGS
             val yaw: Float = orientationArray[0] * FROM_RADS_TO_DEGS
-            val orientation = Orientation(pitch.toDouble(), roll.toDouble(), yaw.toDouble())
+            val orientation = Orientation(roll.toDouble(), pitch.toDouble(), yaw.toDouble())
             serviceScope.launch {
                 invoke<Orientation>("publishOrientation", orientation)
             }
