@@ -41,7 +41,8 @@ expect object ServiceMethodProvider {
      * to be called by its name (in String form) and its parameters in a list.
      * The first compatible method overload will be chosen if multiple
      * exist. Nullability is checked so null values may not be used in place
-     * of non-null parameters.
+     * of non-null parameters. Methods with the format `getX()` or `setX()` should be
+     * mapped to the equivalent accessor or mutator of the respective property.
      *
      * @param method: The name of the method to call, case sensitive
      * @param data: A list of parameters to call the method with

@@ -1,6 +1,7 @@
 package org.myrobotlab.android.models
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,9 +18,30 @@ import org.myrobotlab.kotlin.service.Runtime
 import org.myrobotlab.kotlin.utils.Url
 import kotlin.reflect.KClass
 
+/**
+ * Provides primary access to mrlkt in order
+ * to ensure separation between the activity
+ * and the core logic. This view model's
+ * [viewModelScope] is used for any mrlkt
+ * `suspend` calls to ensure the lifecycle
+ * of mrlkt coroutines follow the
+ * view model's lifecycle.
+ */
 class MrlClientViewModel: ViewModel() {
     private val _url = MutableStateFlow<Url?>(null)
+
+    /**
+     * Provides a [MutableStateFlow] that
+     * follows [MrlClient.url] except is null before
+     * [connect] is called.
+     */
     val url = _url.asStateFlow()
+
+    /**
+     * Provides a [MutableState] that follows
+     * [MrlClient.connected] for use in Compose and
+     * [org.myrobotlab.android.MainActivity]
+     */
     var connected = mutableStateOf(MrlClient.connected)
 
     init {
@@ -41,6 +63,13 @@ class MrlClientViewModel: ViewModel() {
         }
     }
 
+    /**
+     * Directs mrlkt to connect to the
+     * MRL instance at [url] and sets
+     * this instance's runtime ID to [id].
+     * [MrlClientViewModel.url] / [MrlClient.url]
+     * are set to [url] as a consequence of calling this method
+     */
     fun connect(id: String, url: Url) {
         _url.value = url
 
@@ -53,13 +82,25 @@ class MrlClientViewModel: ViewModel() {
         }
     }
 
+    /**
+     * Disconnect this mrlkt instance from
+     * the connected MRL instance. No-op
+     * if not connected.
+     */
     fun disconnect() {
         MrlClient.disconnect()
     }
 
+    /**
+     * Start a service pointed to by [type] and
+     * initialize it with the given [name]. The class
+     * pointed to by [type] *must* have a primary
+     * constructor with a single String parameter for
+     * the name.
+     */
     fun startService(name: String, type: KClass<out ServiceInterface>) {
         viewModelScope.launch {
-            Runtime.start(name, type)
+            Runtime.start(name, type)?.serviceScope = this
         }
     }
 }

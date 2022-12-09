@@ -22,7 +22,8 @@ import kotlin.reflect.KType
 /**
  * DSL method to provide a similar API to [ServiceMethod.subscribeTo()]
  */
-infix fun <P> KFunction1<P, *>.subscribeTo(method: ServiceMethod) {
+infix fun <P, R> KFunction1<P, R>.subscribeTo(method: ServiceMethod) {
+
     TODO("Implement subscription")
 }
 
@@ -106,7 +107,7 @@ interface ServiceInterface {
      * A coroutine scope that this service may use to launch additional
      * coroutines.
      */
-    val serviceScope: CoroutineScope
+    var serviceScope: CoroutineScope
 
     /**
      * Launch a new coroutine within the provided scope
@@ -193,8 +194,16 @@ interface ServiceInterface {
  */
 @MrlClassMapping("org.myrobotlab.framework.Service")
 abstract class Service(override val name: String) : KoinComponent, ServiceInterface {
+    /**
+     * Map of method name to listeners to that method.
+     */
     private val mrlListeners = mutableMapOf<String, MutableList<MRLListener>>()
 
+    /**
+     * Map between method names and their [ServiceMethod] reference.
+     *
+     * FIXME This currently overwrites method overloads, switch to list of overloads
+     */
     @Transient
     private val serviceMethods = methods.associateBy({ it.methodName }, { it })
 

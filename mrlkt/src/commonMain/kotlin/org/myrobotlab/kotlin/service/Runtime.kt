@@ -6,10 +6,27 @@ import org.myrobotlab.kotlin.framework.ServiceMethodProvider.constructService
 import org.myrobotlab.kotlin.utils.ImmutableMapWrapper
 import kotlin.reflect.KClass
 
+/**
+ * Core runtime service that handles service
+ * registration and connection handshake procedures.
+ * This service is not marked with [org.myrobotlab.kotlin.annotations.MrlService]
+ * to ensure it is not exposed as a user-startable
+ * service.
+ */
 object Runtime: Service("runtime") {
+    /**
+     * The ID of this mrlkt instance, i.e. `"android"`.
+     * [initRuntime] must be called before accessing this
+     * property.
+     */
     lateinit var runtimeID: String
     private set
 
+    /**
+     * The service registry that is only mutable
+     * within this [Runtime] service. It is exposed
+     * through [registry] via a read-only wrapper.
+     */
     private val mutableRegistry = mutableMapOf<String, Registration>()
 
     /**
@@ -18,27 +35,54 @@ object Runtime: Service("runtime") {
      */
     val registry: Map<String, Registration> = ImmutableMapWrapper(mutableRegistry)
 
+    /**
+     * Initialize the runtime service with
+     * an mrlkt runtime [id], i.e. `"android"`.
+     * This method *must* be called before initiating
+     * a connection with [MrlClient.connectCoroutine] or
+     * its blocking variant [MrlClient.connect].
+     *
+     * TODO use lambdas with receivers to make [MrlClient.connectCoroutine]
+     *  only available within an [initRuntime] call to prevent
+     *  order of calls errors
+     */
     fun initRuntime(id: String) {
         require(!MrlClient.connected) {"Runtime may only be initialized while disconnected"}
         runtimeID = id
         mutableRegistry["runtime"] = Registration(runtimeID, "runtime", "org.myrobotlab.service.Runtime")
     }
 
-
+    /**
+     * Register a newly-discovered/created service
+     * described by [registration]
+     * to [registry] and inform interested parties
+     * by invoking [registered].
+     */
     suspend fun register(registration: Registration) {
         MrlClient.logger.info("Registering: ${registration.name}")
         mutableRegistry[registration.name] = registration
         invoke<Registration>("registered", registration)
     }
 
-    suspend fun registered(registration: Registration): Registration {
+    /**
+     * Publishing point for when a new service is registered.
+     * Services wishing to be notified when this occurs
+     * should subscribe to this method, *not*
+     * [register].
+     */
+    fun registered(registration: Registration): Registration {
         MrlClient.logger.info("Registered service: ${registration.name}@${registration.id}")
         return registration
     }
 
+    /**
+     * Get a description of this mrlkt instance. This
+     * method's Java equivalent is used as part of the handshake
+     * procedure.
+     */
     fun describe(uuid: String, query: String): DescribeResults {
         MrlClient.logger.info("Calling describe")
-        return DescribeResults(runtimeID, "", mapOf(), null, null, registry.values.toList())
+        return DescribeResults(runtimeID, "", DescribeQuery(), null, null, registry.values.toList())
     }
 
     /**
@@ -75,6 +119,14 @@ object Runtime: Service("runtime") {
         }
     }
 
+    /**
+     * Add a listener, the subscriber will be notifed when
+     * the topic method is invoked. Additionally,
+     * [MrlClient.connected] will be set to true
+     * when the listener topic method is `"registered"`
+     * and the callback name is `"runtime"`, as this defines
+     * the end of the handshake sequence.
+     */
     override fun addListener(listener: MRLListener) {
         super.addListener(listener)
         if (listener.topicMethod == "registered" && listener.callbackName == "runtime") {
