@@ -21,7 +21,10 @@ of being merged into MyRobotLab and this README will be updated once they have b
 8. Compile and run MyRobotLab Android on either an emulator or a physical device
 9. Press the `Connect` button on the `Client` tab and enter your computer's
   IP address. If running an emulator on the same machine, use `10.0.2.2` to connect to localhost.
-10. Explore the app. There are currently 2 services available, `TestKotlinService` and `Gyro`.
+10. Explore the app. There are currently 2 services available: `TestKotlinService` and `Gyro`.
+
+Example scripts are available in the `examples/` directory. They assume the Android app has the id `"android"`
+and that any required services are started on the app-side first. These scripts should be executed through the MyRobotLab Python service.
 
 # For Developers
 
