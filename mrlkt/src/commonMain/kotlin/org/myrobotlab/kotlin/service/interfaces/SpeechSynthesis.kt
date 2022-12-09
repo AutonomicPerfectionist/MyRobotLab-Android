@@ -1,5 +1,7 @@
 package org.myrobotlab.kotlin.service.interfaces
 
+import org.myrobotlab.kotlin.annotations.MrlClassMapping
+import org.myrobotlab.kotlin.framework.interfaces.NameProvider
 import org.myrobotlab.kotlin.service.data.Voice
 
 
@@ -8,6 +10,7 @@ import org.myrobotlab.kotlin.service.data.Voice
  * speech should implement.
  *
  */
+@MrlClassMapping("org.myrobotlab.service.interfaces.SpeechSynthesis")
 interface SpeechSynthesis : NameProvider, TextListener {
     val lastUtterance: String?
 
