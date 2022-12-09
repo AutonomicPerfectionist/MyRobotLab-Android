@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.e("MrlAndroid", "Registry: ${serviceRegistry}")
+        Log.d("MrlAndroid", "Registry: $serviceRegistry")
 
 
         val appModule = module {
@@ -49,6 +49,8 @@ class MainActivity : ComponentActivity() {
             factory { androidContext().getSystemService(Activity.SENSOR_SERVICE) as SensorManager}
         }
 
+        // Simple fix to ensure config changes
+        // like changing orientation don't crash the app
         if (GlobalContext.getOrNull() != null)
             stopKoin()
 
@@ -77,11 +79,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Greeting(text: String) {
-    Text(text = text)
 }
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
