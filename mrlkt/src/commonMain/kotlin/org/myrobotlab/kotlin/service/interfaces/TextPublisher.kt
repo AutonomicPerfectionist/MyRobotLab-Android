@@ -1,6 +1,7 @@
 package org.myrobotlab.kotlin.service.interfaces
 
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
+import org.myrobotlab.kotlin.framework.interfaces.NameProvider
 
 @MrlClassMapping("org.myrobotlab.service.interfaces.TextPublisher")
 interface TextPublisher : NameProvider {
