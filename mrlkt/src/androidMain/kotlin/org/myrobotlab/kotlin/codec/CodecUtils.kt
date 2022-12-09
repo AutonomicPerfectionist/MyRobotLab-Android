@@ -79,11 +79,11 @@ class CodecUtils {
 
         fun <T> T.toJson(): String {
             return if (this is Message) {
-                val newMsg = this.copy()
-                for (index in newMsg.data.indices) {
-                    newMsg.data[index] = mapper.writeValueAsString(newMsg.data[index])
+                val params = this.data.toMutableList()
+                for (index in params.indices) {
+                    params[index] = mapper.writeValueAsString(params[index])
                 }
-                mapper.writeValueAsString(newMsg)
+                mapper.writeValueAsString(this.copy(data = params))
             } else {
                 mapper.writeValueAsString(this)
             }
@@ -92,17 +92,19 @@ class CodecUtils {
         inline fun <reified T> String.fromJson(): T {
             val obj: T = mapper.readValue(this)
             if (obj is Message) {
-                for(i in obj.data.indices) {
-                    val dataStr = obj.data[i]
+                val params = obj.data.toMutableList()
+                for(i in params.indices) {
+                    val dataStr = params[i]
                     if (dataStr is String) {
                         MrlClient.logger.info("Converting data $dataStr")
                         try {
-                            obj.data[i] = dataStr.fromJson(Any::class)
+                            params[i] = dataStr.fromJson(Any::class)
                         } catch (e: Exception) {
                             MrlClient.logger.info("EXCEPTION: $e")
                         }
                     }
                 }
+                return obj.copy(data = params) as T
             }
             return obj
         }
