@@ -3,6 +3,8 @@ package org.myrobotlab.android.views
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -81,6 +83,20 @@ fun AboutScreen() {
         )
 
         Text("License: Apache 2.0")
+        
+        Spacer(modifier = Modifier.height(25.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(onClick = {
+                uriHandler.openUri("https://github.com/sponsors/AutonomicPerfectionist/")
+            },
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant)
+            ) {
+                Text(text = "Donate")
+            }
+        }
     }
 }
 
