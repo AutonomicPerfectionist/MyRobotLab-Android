@@ -54,7 +54,7 @@ class MainActivity : FragmentActivity() {
             && companion.requiredPermissions.isNotEmpty()) {
             Log.e("MRLAndroid", "Got companion object: ${service.companionObjectInstance}")
             permissionsBuilder(companion.requiredPermissions[0], *companion.requiredPermissions.slice(
-                0 until companion.requiredPermissions.size
+                1 until companion.requiredPermissions.size
             )
                 .toTypedArray()).build().send { result->
                     if(result.allGranted()) {
