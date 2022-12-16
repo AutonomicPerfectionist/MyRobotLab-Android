@@ -41,6 +41,7 @@ dependencies {
     val koinAndroidVersion= "3.3.0"
     val koinAndroidComposeVersion= "3.3.0"
     val jacksonVersion = "2.13.4"
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
     implementation(project(":mrlkt"))
     implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     implementation("androidx.compose.ui:ui:1.2.1")
@@ -65,6 +66,9 @@ dependencies {
     implementation("io.insert-koin:koin-android-compat:$koinAndroidVersion")
     // Jetpack Compose
     implementation("io.insert-koin:koin-androidx-compose:$koinAndroidComposeVersion")
+
+    // Better permissions library
+    implementation("com.github.fondesa:kpermissions:3.4.0")
 
     val ktorVersion = "2.1.2"
 
