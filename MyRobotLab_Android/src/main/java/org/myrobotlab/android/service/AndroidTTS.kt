@@ -8,6 +8,14 @@ import org.myrobotlab.kotlin.framework.Service
 import org.myrobotlab.kotlin.service.data.Voice
 import org.myrobotlab.kotlin.service.interfaces.SpeechSynthesis
 
+/**
+ * A [SpeechSynthesis] service that uses the Android [TextToSpeech]
+ * system as its backend. The voices available are the voices
+ * installed on the target device, and the speech
+ * can either be directly output through the device's
+ * speakers or saved to a file for use with audio syncing
+ * services.
+ */
 @MrlService
 class AndroidTTS(name: String): Service(name), SpeechSynthesis {
     private val tts: TextToSpeech by inject()
