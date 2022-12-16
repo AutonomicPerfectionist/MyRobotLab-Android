@@ -12,6 +12,10 @@ import org.myrobotlab.kotlin.service.data.Voice
  */
 @MrlClassMapping("org.myrobotlab.service.interfaces.SpeechSynthesis")
 interface SpeechSynthesis : NameProvider, TextListener {
+    /**
+     * The last speech that was played,
+     * null if no speech audio played yet
+     */
     val lastUtterance: String?
 
     /**

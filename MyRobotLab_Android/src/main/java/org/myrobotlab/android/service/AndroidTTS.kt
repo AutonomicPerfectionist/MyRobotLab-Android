@@ -15,13 +15,16 @@ import org.myrobotlab.kotlin.service.interfaces.SpeechSynthesis
  * can either be directly output through the device's
  * speakers or saved to a file for use with audio syncing
  * services.
+ *
+ * TODO requires peer, AudioFile, and AudioData support
+ *  for full compatibility
  */
 @MrlService
 class AndroidTTS(name: String): Service(name), SpeechSynthesis {
     private val tts: TextToSpeech by inject()
 
-    override val lastUtterance: String?
-        get() = TODO("Not yet implemented")
+    override var lastUtterance: String? = null
+        private set
 
     override fun setVoice(v: String) {
         TODO("Not yet implemented")

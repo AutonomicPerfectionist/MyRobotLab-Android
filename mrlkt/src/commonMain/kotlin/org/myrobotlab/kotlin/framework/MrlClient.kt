@@ -26,6 +26,12 @@ expect class JsonSerde() {
     fun <T> serialize(o: T): String
 }
 
+/**
+ * Basic Logger interface.
+ *
+ * FIXME replace with cross-platform
+ *  logging library
+ */
 interface Logger {
     fun info(toLog: String)
 }

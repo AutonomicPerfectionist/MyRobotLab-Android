@@ -36,7 +36,7 @@ import org.myrobotlab.kotlin.service.interfaces.Sampler
  * The orientation angles range from -180 to +180
  * with zero pitch and roll being defined as the standard
  * perfectly vertical Portrait orientation. Yaw's
- * zero is harder to define, it is recommended to find it by experimentation,
+ * zero is harder to define, it is recommended to find it by experimentation.
  *
  * @author AutonomicPerfectionist
  */

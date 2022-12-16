@@ -3,6 +3,10 @@ package org.myrobotlab.kotlin.service.interfaces
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
 import org.myrobotlab.kotlin.framework.interfaces.NameProvider
 
+/**
+ * A service that can listen for
+ * and respond to text events.
+ */
 @MrlClassMapping("org.myrobotlab.service.interfaces.TextListener")
 interface TextListener : NameProvider {
     @Throws(Exception::class)
@@ -27,5 +31,8 @@ interface TextListener : NameProvider {
         send(name, "attachTextListener", name)
     }
 
+    /**
+     * Unknown usage
+     */
     fun send(name: String?, method: String?, vararg data: Any?)
 }

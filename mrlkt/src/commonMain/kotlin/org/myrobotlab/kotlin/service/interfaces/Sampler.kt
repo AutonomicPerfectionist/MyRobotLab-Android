@@ -8,5 +8,9 @@ import org.myrobotlab.kotlin.service.data.Hertz
  * rate.
  */
 interface Sampler {
+    /**
+     * The rate at which some device should
+     * be sampled.
+     */
     var sampleRate: Hertz
 }
