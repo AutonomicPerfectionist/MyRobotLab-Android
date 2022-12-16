@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
+import com.fondesa.kpermissions.allGranted
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
@@ -28,6 +31,7 @@ import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
+import org.myrobotlab.android.framework.AndroidServiceMeta
 import org.myrobotlab.android.models.MrlClientViewModel
 import org.myrobotlab.android.views.StartServiceListener
 import org.myrobotlab.android.views.TabItem
@@ -35,10 +39,32 @@ import org.myrobotlab.kotlin.framework.ServiceInterface
 import org.myrobotlab.kotlin.utils.Url
 import org.myrobotlab.kotlin.framework.generated.services.serviceRegistry
 import kotlin.reflect.KClass
+import kotlin.reflect.full.companionObjectInstance
+import com.fondesa.kpermissions.extension.permissionsBuilder
+import com.fondesa.kpermissions.extension.send
 
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private val clientViewModel: MrlClientViewModel by viewModels()
+
+    private fun onStartService(name: String, service: KClass<out ServiceInterface>) {
+        val companion = service.companionObjectInstance
+        if(companion != null
+            && companion is AndroidServiceMeta
+            && companion.requiredPermissions.isNotEmpty()) {
+            Log.e("MRLAndroid", "Got companion object: ${service.companionObjectInstance}")
+            permissionsBuilder(companion.requiredPermissions[0], *companion.requiredPermissions.slice(
+                0 until companion.requiredPermissions.size
+            )
+                .toTypedArray()).build().send { result->
+                    if(result.allGranted()) {
+                        clientViewModel.startService(name, service)
+                    }
+            }
+        } else {
+            clientViewModel.startService(name, service)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,9 +95,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val isConnected by remember{ clientViewModel.connected }
                     var url by remember { mutableStateOf(clientViewModel.url.value ?: Url("localhost", 8888)) }
-                    MainScreen(url, serviceRegistry, { name, service ->
-                                                clientViewModel.startService(name, service)
-                    }, isConnected, { host, port, id ->
+                    MainScreen(url, serviceRegistry, this::onStartService, isConnected, { host, port, id ->
                         url = Url(host, port)
                         clientViewModel.connect(id, url)
                     }) {
