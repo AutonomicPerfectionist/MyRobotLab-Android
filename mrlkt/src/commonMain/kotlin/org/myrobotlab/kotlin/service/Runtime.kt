@@ -2,6 +2,8 @@ package org.myrobotlab.kotlin.service
 
 import kotlinx.coroutines.coroutineScope
 import org.myrobotlab.kotlin.framework.*
+import org.myrobotlab.kotlin.framework.MrlClient.remoteId
+import org.myrobotlab.kotlin.framework.MrlClient.serde
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.constructService
 import org.myrobotlab.kotlin.utils.ImmutableMapWrapper
 import kotlin.reflect.KClass
@@ -80,8 +82,10 @@ object Runtime: Service("runtime") {
      * method's Java equivalent is used as part of the handshake
      * procedure.
      */
-    fun describe(uuid: String, query: String): DescribeResults {
+    fun describe(uuid: String, query: String?): DescribeResults {
         MrlClient.logger.info("Calling describe")
+        if(query != null)
+            MrlClient.remoteId = serde.deserialize<Map<String, Any?>>(query)["id"] as String
         return DescribeResults(runtimeID, "", DescribeQuery(), null, null, registry.values.toList())
     }
 
@@ -128,9 +132,13 @@ object Runtime: Service("runtime") {
      * the end of the handshake sequence.
      */
     override fun addListener(listener: MRLListener) {
-        super.addListener(listener)
+
         if (listener.topicMethod == "registered" && listener.callbackName == "runtime") {
+            // Fix for incorrect callback name
+            super.addListener(listener.copy(callbackName = "runtime@$remoteId"))
             MrlClient.connected = true
+        } else {
+            super.addListener(listener)
         }
     }
 }

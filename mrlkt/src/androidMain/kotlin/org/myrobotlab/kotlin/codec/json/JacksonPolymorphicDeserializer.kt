@@ -134,7 +134,8 @@ class JacksonPolymorphicDeserializer<T>(deserializer: JsonDeserializer<T>, clazz
                 classMappings.inverse[typeAsString] ?: typeAsString
             Class.forName(normalizedType)
         } catch (e: ClassNotFoundException) {
-            throw RuntimeException(e)
+//            throw RuntimeException(e)
+            clazz
         }
 
 

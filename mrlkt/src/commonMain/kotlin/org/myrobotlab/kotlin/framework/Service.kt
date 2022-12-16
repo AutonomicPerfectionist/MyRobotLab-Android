@@ -280,11 +280,12 @@ abstract class Service(override val name: String) : KoinComponent, ServiceInterf
     override suspend fun <R> invoke(method: String, vararg data: Any?): R? {
         val ret = this@Service.callMethod<R>(method, data.toList())
         mrlListeners[method]?.forEach { listener ->
-            //TODO: Switch to emitting into the event bus, which will
-            //  handle sending commands to remote services as well as
-            //  to local ones
             MrlClient.logger.info("Invoking for listener ${listener.callbackName}.${listener.callbackMethod}")
-            sendCommand(listener.callbackName, listener.callbackMethod, listOf(ret))
+            val nameParts = listener.callbackName.split('@')
+            if (nameParts.size <= 1 || nameParts[1] == Runtime.runtimeID)
+                eventBus.emit(Message(listener.callbackName, listener.callbackMethod, listOf(ret)))
+            else
+                sendCommand(listener.callbackName, listener.callbackMethod, listOf(ret))
 
         }
         return ret

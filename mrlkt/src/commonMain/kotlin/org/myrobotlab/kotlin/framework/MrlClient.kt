@@ -6,12 +6,12 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.util.reflect.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filter
 import org.myrobotlab.kotlin.service.Runtime
 import org.myrobotlab.kotlin.utils.Url
 import kotlin.properties.Delegates
@@ -64,8 +64,13 @@ object MrlClient {
      * connection to an MRL instance.
      */
     var connected by Delegates.observable(false) { _, _, new ->
+        if (new == false)
+            remoteId = null
         connectedListener(new)
     }
+        internal set
+
+    var remoteId: String? = null
         internal set
 
 
