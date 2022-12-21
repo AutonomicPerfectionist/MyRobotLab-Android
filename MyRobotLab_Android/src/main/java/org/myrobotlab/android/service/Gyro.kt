@@ -4,10 +4,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
-import org.myrobotlab.android.ContextContainer
 import org.myrobotlab.kotlin.annotations.MrlService
 import org.myrobotlab.kotlin.framework.Service
 import org.myrobotlab.kotlin.service.data.*
