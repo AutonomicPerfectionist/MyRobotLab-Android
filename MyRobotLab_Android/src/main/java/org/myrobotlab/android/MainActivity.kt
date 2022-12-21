@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -75,6 +76,7 @@ class MainActivity : FragmentActivity() {
             factory { ContextContainer(androidContext()) }
             factory { androidContext().getSystemService(Activity.SENSOR_SERVICE) as SensorManager}
             factory { TextToSpeech(androidContext()) {} }
+            factory { SpeechRecognizer.createSpeechRecognizer(androidContext()) }
         }
 
         // Simple fix to ensure config changes
