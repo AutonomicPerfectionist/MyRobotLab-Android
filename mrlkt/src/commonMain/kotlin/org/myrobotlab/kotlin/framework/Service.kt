@@ -12,6 +12,7 @@ import org.myrobotlab.kotlin.framework.MrlClient.logger
 import org.myrobotlab.kotlin.framework.MrlClient.sendCommand
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.callMethod
 import org.myrobotlab.kotlin.framework.ServiceMethodProvider.methods
+import org.myrobotlab.kotlin.framework.interfaces.NameProvider
 import org.myrobotlab.kotlin.service.Runtime
 import kotlin.jvm.Transient
 import kotlin.reflect.KCallable
@@ -55,12 +56,12 @@ data class ServiceMethod(
 }
 
 @MrlClassMapping("org.myrobotlab.framework.interfaces.ServiceInterface")
-interface ServiceInterface {
+interface ServiceInterface: NameProvider {
     /**
      * The name of the service, as set by the user
      * when starting a service.
      */
-    val name: String
+    override val name: String
 
     /**
      * The ID of the runtime this service
