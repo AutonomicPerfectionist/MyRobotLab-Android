@@ -17,12 +17,20 @@ import kotlin.reflect.KClass
  */
 object Runtime: Service("runtime") {
     /**
-     * The ID of this mrlkt instance, i.e. `"android"`.
-     * [initRuntime] must be called before accessing this
-     * property.
+     * The ID of this mrlkt instance, i.e. `"mrlkt"`.
+     * [initRuntime] should be called to change this
+     * ID, and registry entries will be updated when
+     * such a call is made.
      */
-    lateinit var runtimeID: String
-    private set
+    var runtimeID: String = "mrlkt"
+    private set(new) {
+
+        mutableRegistry.entries.forEach { entry ->
+            if (entry.value.id == field)
+                entry.setValue(entry.value.copy(id=new))
+        }
+        field = new
+    }
 
     /**
      * The service registry that is only mutable
@@ -133,7 +141,7 @@ object Runtime: Service("runtime") {
      */
     override fun addListener(listener: MRLListener) {
 
-        if (listener.topicMethod == "registered" && listener.callbackName == "runtime") {
+        if (listener.topicMethod == "registered" && listener.callbackName == "runtime@$remoteId") {
             // Fix for incorrect callback name
             super.addListener(listener.copy(callbackName = "runtime@$remoteId"))
             MrlClient.connected = true
