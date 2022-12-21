@@ -1,17 +1,18 @@
 package org.myrobotlab.kotlin.service.interfaces
 
 import org.myrobotlab.kotlin.annotations.MrlClassMapping
+import org.myrobotlab.kotlin.framework.ServiceInterface
 import org.myrobotlab.kotlin.framework.interfaces.NameProvider
 
 @MrlClassMapping("org.myrobotlab.service.interfaces.TextPublisher")
-interface TextPublisher : NameProvider {
+interface TextPublisher : ServiceInterface {
   /**
    * Define the methods that an utterance publisher should have
    *
    * @param text
    * @return
    */
-  fun publishText(text: String?): String?
+  fun publishText(text: String): String
 
   /**
    * Attach a text listener
@@ -28,7 +29,7 @@ interface TextPublisher : NameProvider {
    *
    * @param name
    */
-  fun attachTextListener(name: String?) {
+  fun attachTextListener(name: String) {
     for (publishMethod in publishMethods) {
       addListener(publishMethod, name)
     }
@@ -38,20 +39,14 @@ interface TextPublisher : NameProvider {
     attachTextListener(service.name)
   }
 
-  fun detachTextListener(name: String?) {
-    for (publishMethod in publishMethods) {
-      removeListener(publishMethod, name)
-    }
-  }
+  fun detachTextListener(name: String)
+//  {
+//    for (publishMethod in publishMethods) {
+//      removeListener(publishMethod, name)
+//    }
+//  }
 
-  /**
-   * Add the addListener method to the interface all services implement this.
-   *
-   * @param topicMethod
-   * @param callbackName
-   */
-  fun addListener(topicMethod: String?, callbackName: String?)
-  fun removeListener(topicMethod: String?, callbackName: String?)
+
 
   companion object {
     /**
