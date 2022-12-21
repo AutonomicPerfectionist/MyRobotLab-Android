@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -43,6 +44,9 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
+import org.myrobotlab.kotlin.framework.MrlClient
+import java.net.ConnectException
+import java.net.UnknownHostException
 
 
 class MainActivity : FragmentActivity() {
@@ -70,6 +74,18 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("MrlAndroid", "Registry: $serviceRegistry")
+
+
+        MrlClient.connectionFailedListener = { e ->
+            when(e) {
+                is ConnectException -> Toast.makeText(this,
+                    "Unable to connect, check instance URL", Toast.LENGTH_LONG).show()
+                is UnknownHostException -> Toast.makeText(this,
+                        "Host is unknown, try again", Toast.LENGTH_LONG).show()
+                else -> Toast.makeText(this, "Unknown error occurred", Toast.LENGTH_SHORT).show()
+            }
+
+        }
 
 
         val appModule = module {
