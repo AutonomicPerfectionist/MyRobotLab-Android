@@ -57,6 +57,8 @@ object MrlClient {
      */
     val eventBus = MutableSharedFlow<Message>()
 
+    var connectionFailedListener: (e: Exception) -> Unit = {}
+
     /**
      * Function that is called when [connected]
      * changes.
@@ -149,55 +151,60 @@ object MrlClient {
      */
     suspend fun connectCoroutine(scope: CoroutineScope) {
         websocketJob = scope.async {
-        client.webSocket(
-            method = HttpMethod.Get,
-            host = url.host,
-            port = url.port,
-            path = "/api/messages?id=${Runtime.runtimeID}"
-        ) {
+            try {
+                client.webSocket(
+                    method = HttpMethod.Get,
+                    host = url.host,
+                    port = url.port,
+                    path = "/api/messages?id=${Runtime.runtimeID}"
+                ) {
 
-                try {
-                    session = this@webSocket
-                    val inputRoutine = launch {
-                        for (receivedFrame in incoming) {
-                            if (receivedFrame !is Frame.Text) {
+                    try {
+                        session = this@webSocket
+                        val inputRoutine = launch {
+                            for (receivedFrame in incoming) {
+                                if (receivedFrame !is Frame.Text) {
 
-                                continue
+                                    continue
+                                }
+                                val text = receivedFrame.readText()
+                                logger.info("Received text: $text")
+                                if (text == "X") {
+                                    logger.info("Heartbeat detected")
+                                    continue
+                                }
+                                val receivedMessage = serde.deserialize<Message>(text)
+                                logger.info("Received message: $receivedMessage")
+                                eventBus.emit(receivedMessage)
                             }
-                            val text = receivedFrame.readText()
-                            logger.info("Received text: $text")
-                            if (text == "X") {
-                                logger.info("Heartbeat detected")
-                                continue
-                            }
-                            val receivedMessage = serde.deserialize<Message>(text)
-                            logger.info("Received message: $receivedMessage")
-                            eventBus.emit(receivedMessage)
                         }
-                    }
 
-                    val outputRoutine = launch {
-                        for (message in sendChannel) {
-                            logger.info("Got message to send: $message")
-                            val messageStr = try {
-                                serde.serialize(message)
-                            } catch (e: Exception) {
-                                logger.info("Got exception while serializing message: $e")
-                                throw e
+                        val outputRoutine = launch {
+                            for (message in sendChannel) {
+                                logger.info("Got message to send: $message")
+                                val messageStr = try {
+                                    serde.serialize(message)
+                                } catch (e: Exception) {
+                                    logger.info("Got exception while serializing message: $e")
+                                    throw e
+                                }
+                                logger.info("Sending message: $messageStr")
+                                send(messageStr)
                             }
-                            logger.info("Sending message: $messageStr")
-                            send(messageStr)
                         }
-                    }
 
-                    inputRoutine.join()
-                    outputRoutine.cancelAndJoin()
-                } catch (e: ClosedReceiveChannelException) {
-                    logger.info("Session closed: $e")
-                } catch (ce: CancellationException) {
-                    connected = false
-                    throw ce
+                        inputRoutine.join()
+                        outputRoutine.cancelAndJoin()
+                    } catch (e: ClosedReceiveChannelException) {
+                        logger.info("Session closed: $e")
+                    } catch (ce: CancellationException) {
+                        connected = false
+                        throw ce
+                    }
                 }
+            } catch (e: Exception) {
+                logger.info("Caught exception while connecting: $e")
+                connectionFailedListener(e)
             }
         }
     }
