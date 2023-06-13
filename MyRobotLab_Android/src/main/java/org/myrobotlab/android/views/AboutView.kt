@@ -40,7 +40,7 @@ fun AboutScreen() {
             fontSize = 25.sp
         )
         Spacer(modifier = Modifier.height(30.dp))
-        Text("Version: 0.0.1 Alpha 1")
+        Text("Version: 0.0.1 Alpha 2")
         Text("Author: Branden Butler (AutonomicPerfectionist @ Github.com)")
 
         val annotatedLinkString: AnnotatedString = buildAnnotatedString {
@@ -86,7 +86,7 @@ fun AboutScreen() {
         
         Spacer(modifier = Modifier.height(25.dp))
         Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(onClick = {
@@ -94,7 +94,21 @@ fun AboutScreen() {
             },
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant)
             ) {
-                Text(text = "Donate")
+                Text(text = "Donate to MRL Android")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(25.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(onClick = {
+                uriHandler.openUri("https://www.patreon.com/myrobotlab")
+            },
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant)
+            ) {
+                Text(text = "Donate to MyRobotLab")
             }
         }
     }
