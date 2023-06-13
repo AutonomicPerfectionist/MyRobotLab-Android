@@ -90,21 +90,6 @@ interface ServiceInterface: NameProvider {
     val typeKey: String
 
     /**
-     * The type key of this service. A type
-     * key identifies the language and class of
-     * an object across process boundaries.
-     * For kotlin, this type key is equal to
-     * `"kt:${this::class.qualifiedName}"`.
-     */
-    val type: String
-
-    /**
-     * Equivalent to type,
-     * duplicated due to legacy reasons.
-     */
-    val serviceClass: String
-
-    /**
      * A coroutine scope that this service may use to launch additional
      * coroutines.
      */
@@ -215,10 +200,6 @@ abstract class Service(override val name: String) : KoinComponent, ServiceInterf
         get() = Runtime.runtimeID
 
     override val typeKey: String = "kt:${this::class.qualifiedName}"
-
-    override val type: String by ::typeKey
-
-    override val serviceClass: String by ::type
 
     @Transient
     override var serviceScope: CoroutineScope = MainScope()

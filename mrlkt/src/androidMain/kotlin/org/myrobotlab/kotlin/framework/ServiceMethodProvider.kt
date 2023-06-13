@@ -75,7 +75,7 @@ actual object ServiceMethodProvider {
         }
 
         if (compatibleServiceMethod == null) {
-            throw RuntimeException("Cannot find compatible method ($name@$method($data))")
+            throw RuntimeException("Cannot find compatible method ($fullName.$method($data))")
         }
         // TODO Test whether receiver is needed, test whether method is suspending or not
         if (compatibleServiceMethod.isSuspend) {

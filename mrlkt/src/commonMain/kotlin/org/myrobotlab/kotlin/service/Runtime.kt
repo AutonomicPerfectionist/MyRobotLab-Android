@@ -90,10 +90,10 @@ object Runtime: Service("runtime") {
      * method's Java equivalent is used as part of the handshake
      * procedure.
      */
-    fun describe(uuid: String, query: String?): DescribeResults {
+    fun describe(uuid: String, query: DescribeQuery?): DescribeResults {
         MrlClient.logger.info("Calling describe")
         if(query != null)
-            MrlClient.remoteId = serde.deserialize<Map<String, Any?>>(query)["id"] as String
+            MrlClient.remoteId = query.id
         return DescribeResults(runtimeID, "", DescribeQuery(), null, null, registry.values.toList())
     }
 

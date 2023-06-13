@@ -75,7 +75,7 @@ data class Registration (
         service.typeKey,
         service = service,
         interfaces = service.mrlInterfaceNames,
-        state = "{\"name\": \"${service.name}\", \"id\": \"${service.id}\", \"serviceClass\": ${service.serviceClass}}"
+        state = "{\"name\": \"${service.name}\", \"id\": \"${service.id}\", \"typeKey\": ${service.typeKey}}"
     )
 
 }
